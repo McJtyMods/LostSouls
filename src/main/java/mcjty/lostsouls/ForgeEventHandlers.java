@@ -91,6 +91,9 @@ public class ForgeEventHandlers {
                             return;
                         }
                         entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+                        if (Config.CHECK_VALID_SPAWN && !((EntityLiving)entity).getCanSpawnHere()) {
+                            return;
+                        }
                         if (!((EntityLiving)entity).isNotColliding()) {
                             return;
                         }
