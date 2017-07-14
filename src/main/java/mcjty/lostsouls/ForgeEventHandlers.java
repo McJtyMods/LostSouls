@@ -47,33 +47,30 @@ public class ForgeEventHandlers {
         for (EntityPlayerMP player : list.getPlayers()) {
             IChunkGenerator v = ((WorldServer) player.getEntityWorld()).getChunkProvider().chunkGenerator;
             if (v instanceof ILostChunkGenerator) {
-                ILostChunkGenerator lost = (ILostChunkGenerator) v;
-                BlockPos position = player.getPosition();
-                int chunkX = position.getX() >> 4;
-                int chunkZ = position.getZ() >> 4;
-                ILostChunkInfo chunkInfo = lost.getChunkInfo(chunkX, chunkZ);
-                String buildingType = chunkInfo.getBuildingType();
-                if (buildingType != null) {
-                    // We have a building
-                    if (Config.getExcludedBuildings().contains(buildingType)) {
-                        return;
-                    }
+                handleSpawn(player, (ILostChunkGenerator) v);
+            }
+        }
+    }
 
-                    World world = player.getEntityWorld();
+    private void handleSpawn(EntityPlayerMP player, ILostChunkGenerator lost) {
+        BlockPos position = player.getPosition();
+        int chunkX = position.getX() >> 4;
+        int chunkZ = position.getZ() >> 4;
+        ILostChunkInfo chunkInfo = lost.getChunkInfo(chunkX, chunkZ);
+        String buildingType = chunkInfo.getBuildingType();
+        if (buildingType != null) {
+            // We have a building
+            if (!Config.getExcludedBuildings().contains(buildingType)) {
+                World world = player.getEntityWorld();
 
-                    LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
-                    if (!data.isHaunted()) {
-                        return;
-                    }
-                    if (data.getNumberKilled() >= data.getMaxMobs()) {
-                        return;
-                    }
+                LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
+                if (data.isHaunted() && data.getNumberKilled() < data.getMaxMobs()) {
 
                     double x = chunkX * 16 + world.rand.nextDouble() * 16.0;
-                    double y = (double) (position.getY() + world.rand.nextInt(3) - 1);
+                    double y = (position.getY() + world.rand.nextInt(3) - 1);
                     double z = chunkZ * 16 + world.rand.nextDouble() * 16.0;
 
-                    if (world.isAirBlock(new BlockPos(x, y-1, z))) {
+                    if (world.isAirBlock(new BlockPos(x, y - 1, z))) {
                         y--;
                     }
                     if (!world.isAirBlock(new BlockPos(x, y, z))) {
@@ -81,27 +78,22 @@ public class ForgeEventHandlers {
                     }
                     if (world.isAirBlock(new BlockPos(x, y, z))) {
                         double distance = position.getDistance((int) x, (int) y, (int) z);
-                        if (distance < Config.MIN_SPAWN_DISTANCE) {
-                            return;
-                        }
-                        String mob = Tools.getRandomFromList(world.rand, Config.getRandomMobs());
-                        Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(mob), world);
-                        int cnt = world.getEntitiesWithinAABB(entity.getClass(), (new AxisAlignedBB(x, y, z, x+1, y+1, z+1).grow(8.0))).size();
-                        if (cnt > Config.SPAWN_MAX_NEARBY) {
-                            return;
-                        }
-                        entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
-                        if (Config.CHECK_VALID_SPAWN && !((EntityLiving)entity).getCanSpawnHere()) {
-                            return;
-                        }
-                        if (!((EntityLiving)entity).isNotColliding()) {
-                            return;
-                        }
+                        if (distance >= Config.MIN_SPAWN_DISTANCE) {
+                            String mob = Tools.getRandomFromList(world.rand, Config.getRandomMobs());
+                            Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(mob), world);
+                            int cnt = world.getEntitiesWithinAABB(entity.getClass(), (new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1).grow(8.0))).size();
+                            if (cnt <= Config.SPAWN_MAX_NEARBY) {
+                                entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+                                if (!Config.CHECK_VALID_SPAWN || ((EntityLiving) entity).getCanSpawnHere()) {
+                                    if (((EntityLiving) entity).isNotColliding()) {
+                                        boostEntity(world, (EntityLiving) entity);
 
-                        boostEntity(world, (EntityLiving) entity);
-
-                        entity.addTag("_ls_:" + world.provider.getDimension()+":"+chunkX+":"+chunkZ);
-                        world.spawnEntity(entity);
+                                        entity.addTag("_ls_:" + world.provider.getDimension() + ":" + chunkX + ":" + chunkZ);
+                                        world.spawnEntity(entity);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -111,14 +103,14 @@ public class ForgeEventHandlers {
     private void boostEntity(World world, EntityLiving entity) {
         IAttributeInstance entityAttribute = entity.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
         if (entityAttribute != null) {
-            float f = world.rand.nextFloat()*(Config.MAX_HEALTH_BONUS-Config.MIN_HEALTH_BONUS) + Config.MIN_HEALTH_BONUS;
+            float f = world.rand.nextFloat() * (Config.MAX_HEALTH_BONUS - Config.MIN_HEALTH_BONUS) + Config.MIN_HEALTH_BONUS;
             double newMax = entityAttribute.getBaseValue() * f;
             entityAttribute.setBaseValue(newMax);
             entity.setHealth((float) newMax);
         }
         entityAttribute = entity.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
         if (entityAttribute != null) {
-            float f = world.rand.nextFloat()*(Config.MAX_DAMAGE_BONUS-Config.MIN_DAMAGE_BONUS) + Config.MIN_DAMAGE_BONUS;
+            float f = world.rand.nextFloat() * (Config.MAX_DAMAGE_BONUS - Config.MIN_DAMAGE_BONUS) + Config.MIN_DAMAGE_BONUS;
             double newMax = entityAttribute.getBaseValue() * f;
             entityAttribute.setBaseValue(newMax);
         }
