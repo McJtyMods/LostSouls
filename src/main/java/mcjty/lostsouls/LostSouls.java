@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
         acceptableRemoteVersions = "*")
 public class LostSouls {
     public static final String MODID = "lostsouls";
-    public static final String VERSION = "0.0.1beta";
+    public static final String VERSION = "0.0.2beta";
     public static final String LOSTCITY_VERSION = "0.0.17beta";
     public static final String MIN_FORGE11_VER = "13.19.0.2176";
 
