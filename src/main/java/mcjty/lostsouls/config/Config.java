@@ -22,6 +22,8 @@ public class Config {
     public static float MAX_DAMAGE_BONUS = 5f;
     public static boolean CHECK_VALID_SPAWN = false;
 
+    public static boolean ANNOUNCE_CLEARED = true;
+
     private static String[] EXCLUDED_BUILDINGS = new String[]{};
     private static String[] MOBS = new String[] { ".3=minecraft:zombie", ".3=minecraft:spider", ".3=minecraft:skeleton", ".2=minecraft:husk", ".2=minecraft:stray", ".1=minecraft:witch", ".1=minecraft:enderman" };
     private static String[] RANDOM_WEAPONS = new String[] { ".3=null", ".3=minecraft:diamond_sword", ".3=minecraft:iron_sword", ".3=minecraft:bow" };
@@ -29,6 +31,7 @@ public class Config {
     private static String[] RANDOM_CHESTS = new String[] { ".3=null", ".3=minecraft:diamond_chestplate", ".3=minecraft:iron_chestplate" };
     private static String[] RANDOM_LEGGINGS = new String[] { ".3=null", ".3=minecraft:diamond_leggings", ".3=minecraft:iron_leggings" };
     private static String[] RANDOM_BOOTS = new String[] { ".3=null", ".3=minecraft:diamond_boots", ".3=minecraft:iron_boots" };
+    private static String[] RANDOM_EFFECTS = new String[] { ".3=minecraft:regeneration,3", ".3=minecraft:speed,3", ".3=minecraft:fire_resistance,3" };
 
     private static Set<String> excludedBuildings = null;
     private static List<Pair<Float, String>> randomMobs = null;
@@ -37,6 +40,7 @@ public class Config {
     private static List<Pair<Float, String>> randomChests = null;
     private static List<Pair<Float, String>> randomLeggings = null;
     private static List<Pair<Float, String>> randomBoots = null;
+    private static List<Pair<Float, String>> randomEffects = null;
 
     public static Set<String> getExcludedBuildings() {
         if (excludedBuildings == null) {
@@ -94,6 +98,14 @@ public class Config {
         return randomBoots;
     }
 
+    public static List<Pair<Float, String>> getRandomEffects() {
+        if (randomEffects == null) {
+            randomEffects = new ArrayList<>();
+            makeList(randomEffects, RANDOM_EFFECTS);
+        }
+        return randomEffects;
+    }
+
 
     private static void makeList(List<Pair<Float, String>> list, String[] elements) {
         for (String s : elements) {
@@ -122,11 +134,13 @@ public class Config {
         HAUNTED_CHANCE = cfg.getFloat("hauntedChance", CATEGORY_GENERAL, HAUNTED_CHANCE, 0, 1, "The chance that a building is haunted");
         EXCLUDED_BUILDINGS = cfg.getStringList("excludedBuildings", CATEGORY_GENERAL, EXCLUDED_BUILDINGS, "List of building names where this mod will not spawn mobs");
         CHECK_VALID_SPAWN = cfg.getBoolean("checkValidSpawn", CATEGORY_GENERAL, CHECK_VALID_SPAWN, "If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level");
+        ANNOUNCE_CLEARED = cfg.getBoolean("announceCleared", CATEGORY_GENERAL, ANNOUNCE_CLEARED, "If this is true then the player will be notified when a building is cleared");
         MOBS = cfg.getStringList("mobs", CATEGORY_GENERAL, MOBS, "List of mobs that can spawn in buildings together with their rarity");
         RANDOM_WEAPONS = cfg.getStringList("randomWeapons", CATEGORY_GENERAL, RANDOM_WEAPONS, "List of weapons that the mobs can have together with their rarity");
         RANDOM_HELMETS = cfg.getStringList("randomHelmets", CATEGORY_GENERAL, RANDOM_HELMETS, "List of helmets that the mobs can have together with their rarity");
         RANDOM_CHESTS = cfg.getStringList("randomChestplates", CATEGORY_GENERAL, RANDOM_CHESTS, "List of chestplates that the mobs can have together with their rarity");
         RANDOM_LEGGINGS = cfg.getStringList("randomLeggings", CATEGORY_GENERAL, RANDOM_LEGGINGS, "List of leggings that the mobs can have together with their rarity");
         RANDOM_BOOTS = cfg.getStringList("randomBoots", CATEGORY_GENERAL, RANDOM_BOOTS, "List of boots that the mobs can have together with their rarity");
+        RANDOM_EFFECTS = cfg.getStringList("randomEffects", CATEGORY_GENERAL, RANDOM_EFFECTS, "List of effects that a mob can have. Note that multiple effects are possible");
     }
 }

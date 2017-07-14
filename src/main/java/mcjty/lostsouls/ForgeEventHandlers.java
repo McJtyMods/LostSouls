@@ -13,14 +13,19 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -30,6 +35,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class ForgeEventHandlers {
 
@@ -52,6 +58,14 @@ public class ForgeEventHandlers {
         }
     }
 
+    private boolean isHaunted(int chunkX, int chunkZ, World world, String buildingType) {
+        if (Config.getExcludedBuildings().contains(buildingType)) {
+            return false;
+        }
+        LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
+        return data.isHaunted() && data.getNumberKilled() < data.getMaxMobs();
+    }
+
     private void handleSpawn(EntityPlayerMP player, ILostChunkGenerator lost) {
         BlockPos position = player.getPosition();
         int chunkX = position.getX() >> 4;
@@ -60,37 +74,32 @@ public class ForgeEventHandlers {
         String buildingType = chunkInfo.getBuildingType();
         if (buildingType != null) {
             // We have a building
-            if (!Config.getExcludedBuildings().contains(buildingType)) {
-                World world = player.getEntityWorld();
+            World world = player.getEntityWorld();
+            if (isHaunted(chunkX, chunkZ, world, buildingType)) {
+                double x = chunkX * 16 + world.rand.nextDouble() * 16.0;
+                double y = (position.getY() + world.rand.nextInt(3) - 1);
+                double z = chunkZ * 16 + world.rand.nextDouble() * 16.0;
 
-                LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
-                if (data.isHaunted() && data.getNumberKilled() < data.getMaxMobs()) {
+                if (world.isAirBlock(new BlockPos(x, y - 1, z))) {
+                    y--;
+                }
+                if (!world.isAirBlock(new BlockPos(x, y, z))) {
+                    y++;
+                }
+                if (world.isAirBlock(new BlockPos(x, y, z))) {
+                    double distance = position.getDistance((int) x, (int) y, (int) z);
+                    if (distance >= Config.MIN_SPAWN_DISTANCE) {
+                        String mob = Tools.getRandomFromList(world.rand, Config.getRandomMobs());
+                        Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(mob), world);
+                        int cnt = world.getEntitiesWithinAABB(entity.getClass(), (new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1).grow(8.0))).size();
+                        if (cnt <= Config.SPAWN_MAX_NEARBY) {
+                            entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+                            if (!Config.CHECK_VALID_SPAWN || ((EntityLiving) entity).getCanSpawnHere()) {
+                                if (((EntityLiving) entity).isNotColliding()) {
+                                    boostEntity(world, (EntityLiving) entity);
 
-                    double x = chunkX * 16 + world.rand.nextDouble() * 16.0;
-                    double y = (position.getY() + world.rand.nextInt(3) - 1);
-                    double z = chunkZ * 16 + world.rand.nextDouble() * 16.0;
-
-                    if (world.isAirBlock(new BlockPos(x, y - 1, z))) {
-                        y--;
-                    }
-                    if (!world.isAirBlock(new BlockPos(x, y, z))) {
-                        y++;
-                    }
-                    if (world.isAirBlock(new BlockPos(x, y, z))) {
-                        double distance = position.getDistance((int) x, (int) y, (int) z);
-                        if (distance >= Config.MIN_SPAWN_DISTANCE) {
-                            String mob = Tools.getRandomFromList(world.rand, Config.getRandomMobs());
-                            Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(mob), world);
-                            int cnt = world.getEntitiesWithinAABB(entity.getClass(), (new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1).grow(8.0))).size();
-                            if (cnt <= Config.SPAWN_MAX_NEARBY) {
-                                entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
-                                if (!Config.CHECK_VALID_SPAWN || ((EntityLiving) entity).getCanSpawnHere()) {
-                                    if (((EntityLiving) entity).isNotColliding()) {
-                                        boostEntity(world, (EntityLiving) entity);
-
-                                        entity.addTag("_ls_:" + world.provider.getDimension() + ":" + chunkX + ":" + chunkZ);
-                                        world.spawnEntity(entity);
-                                    }
+                                    entity.addTag("_ls_:" + world.provider.getDimension() + ":" + chunkX + ":" + chunkZ);
+                                    world.spawnEntity(entity);
                                 }
                             }
                         }
@@ -114,6 +123,20 @@ public class ForgeEventHandlers {
             double newMax = entityAttribute.getBaseValue() * f;
             entityAttribute.setBaseValue(newMax);
         }
+
+        for (Pair<Float, String> pair : Config.getRandomEffects()) {
+            if (world.rand.nextFloat() < pair.getLeft()) {
+                String s = pair.getRight();
+                String[] split = StringUtils.split(s, ',');
+                Potion value = ForgeRegistries.POTIONS.getValue(new ResourceLocation(split[0]));
+                if (value == null) {
+                    throw new RuntimeException("Cannot find potion effect '" + split[0] + "'!");
+                }
+                int amplitude = Integer.parseInt(split[1]);
+                entity.addPotionEffect(new PotionEffect(value, 10000, amplitude));
+            }
+        }
+
         String weapon = Tools.getRandomFromList(world.rand, Config.getRandomWeapons());
         if (!"null".equals(weapon)) {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(weapon));
@@ -153,9 +176,9 @@ public class ForgeEventHandlers {
 
     @SubscribeEvent
     public void onKill(LivingDeathEvent event) {
-        if (event.getSource().getTrueSource() instanceof EntityPlayer) {
+        Entity source = event.getSource().getTrueSource();
+        if (source instanceof EntityPlayer) {
             for (String tag : event.getEntity().getTags()) {
-                System.out.println(tag);
                 if (tag.startsWith("_ls_:")) {
                     String[] split = StringUtils.split(tag, ':');
                     try {
@@ -164,9 +187,11 @@ public class ForgeEventHandlers {
                         int z = Integer.parseInt(split[3]);
                         LostChunkData data = LostSoulData.getSoulData(event.getEntity().world, dim, x, z);
                         data.newKill();
-//                        if (data.getNumberKilled() >= data.getMaxMobs()) {
-//                            System.out.println("CLEARED !");
-//                        }
+                        if (Config.ANNOUNCE_CLEARED) {
+                            if (data.getNumberKilled() == data.getMaxMobs()) {
+                                source.sendMessage(new TextComponentString(TextFormatting.GREEN + "The building feels a lot safer now!"));
+                            }
+                        }
                         LostSoulData.getData(event.getEntity().world).save(event.getEntity().world);
                     } catch (NumberFormatException e) {
                         System.out.println("ForgeEventHandlers.onKill ERROR");
