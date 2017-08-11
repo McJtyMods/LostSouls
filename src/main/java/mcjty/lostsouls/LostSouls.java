@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
                 "required-after:lostcities@[" + LostSouls.LOSTCITY_VERSION + ",);" +
                         "after:forge@[" + LostSouls.MIN_FORGE11_VER + ",)",
         version = LostSouls.VERSION,
+        acceptedMinecraftVersions = "[1.12,1.13)",
         acceptableRemoteVersions = "*")
 public class LostSouls {
     public static final String MODID = "lostsouls";
