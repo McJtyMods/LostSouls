@@ -76,30 +76,39 @@ public class ForgeEventHandlers {
             // We have a building
             World world = player.getEntityWorld();
             if (isHaunted(chunkX, chunkZ, world, buildingType)) {
-                double x = chunkX * 16 + world.rand.nextDouble() * 16.0;
-                double y = (position.getY() + world.rand.nextInt(3) - 1);
-                double z = chunkZ * 16 + world.rand.nextDouble() * 16.0;
+                int realHeight = lost.getRealHeight(chunkInfo.getCityLevel());
 
-                if (world.isAirBlock(new BlockPos(x, y - 1, z))) {
-                    y--;
-                }
-                if (!world.isAirBlock(new BlockPos(x, y, z))) {
-                    y++;
-                }
-                if (world.isAirBlock(new BlockPos(x, y, z))) {
-                    double distance = position.getDistance((int) x, (int) y, (int) z);
-                    if (distance >= Config.MIN_SPAWN_DISTANCE) {
-                        String mob = Tools.getRandomFromList(world.rand, Config.getRandomMobs());
-                        Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(mob), world);
-                        int cnt = world.getEntitiesWithinAABB(entity.getClass(), (new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1).grow(8.0))).size();
-                        if (cnt <= Config.SPAWN_MAX_NEARBY) {
-                            entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
-                            if (!Config.CHECK_VALID_SPAWN || ((EntityLiving) entity).getCanSpawnHere()) {
-                                if (((EntityLiving) entity).isNotColliding()) {
-                                    boostEntity(world, (EntityLiving) entity);
+                // Restrict spawning to roughly the dimensions of the building
+                int miny = realHeight - (chunkInfo.getNumCellars() + 1) * 6;
+                int maxy = realHeight + (chunkInfo.getNumFloors() + 1) * 6;
 
-                                    entity.addTag("_ls_:" + world.provider.getDimension() + ":" + chunkX + ":" + chunkZ);
-                                    world.spawnEntity(entity);
+                if (position.getY() >= miny && position.getY() <= maxy) {
+
+                    double x = chunkX * 16 + world.rand.nextDouble() * 16.0;
+                    double y = (position.getY() + world.rand.nextInt(3) - 1);
+                    double z = chunkZ * 16 + world.rand.nextDouble() * 16.0;
+
+                    if (world.isAirBlock(new BlockPos(x, y - 1, z))) {
+                        y--;
+                    }
+                    if (!world.isAirBlock(new BlockPos(x, y, z))) {
+                        y++;
+                    }
+                    if (world.isAirBlock(new BlockPos(x, y, z))) {
+                        double distance = position.getDistance((int) x, (int) y, (int) z);
+                        if (distance >= Config.MIN_SPAWN_DISTANCE) {
+                            String mob = Tools.getRandomFromList(world.rand, Config.getRandomMobs());
+                            Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(mob), world);
+                            int cnt = world.getEntitiesWithinAABB(entity.getClass(), (new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1).grow(8.0))).size();
+                            if (cnt <= Config.SPAWN_MAX_NEARBY) {
+                                entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
+                                if (!Config.CHECK_VALID_SPAWN || ((EntityLiving) entity).getCanSpawnHere()) {
+                                    if (((EntityLiving) entity).isNotColliding()) {
+                                        boostEntity(world, (EntityLiving) entity);
+
+                                        entity.addTag("_ls_:" + world.provider.getDimension() + ":" + chunkX + ":" + chunkZ);
+                                        world.spawnEntity(entity);
+                                    }
                                 }
                             }
                         }
