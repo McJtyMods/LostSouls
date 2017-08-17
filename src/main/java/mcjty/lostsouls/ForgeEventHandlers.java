@@ -191,7 +191,7 @@ public class ForgeEventHandlers {
                             if (data.getNumberKilled() == data.getMaxMobs()) {
                                 source.sendMessage(new TextComponentString(TextFormatting.GREEN + "The building feels a lot safer now!"));
                             } else if (data.getNumberKilled() == data.getMaxMobs() / 2) {
-                                source.sendMessage(new TextComponentString(TextFormatting.GREEN + "About half way there! Keep going!"));
+                                source.sendMessage(new TextComponentString(TextFormatting.YELLOW + "About half way there! Keep going!"));
                             }
                         }
                         LostSoulData.getData(event.getEntity().world).save(event.getEntity().world);
