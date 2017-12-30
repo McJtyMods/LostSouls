@@ -5,7 +5,9 @@ import mcjty.lostcities.api.ILostChunkInfo;
 import mcjty.lostsouls.config.Config;
 import mcjty.lostsouls.data.LostChunkData;
 import mcjty.lostsouls.data.LostSoulData;
+import mcjty.lostsouls.varia.ChunkCoord;
 import mcjty.lostsouls.varia.Tools;
+import net.minecraft.command.CommandSenderWrapper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -13,12 +15,12 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
@@ -37,9 +39,16 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class ForgeEventHandlers {
 
     public static int timeout = Config.SERVERTICK_TIMEOUT;
+
+    // This map keeps the last known chunk position for every player
+    private Map<UUID, ChunkCoord> playerChunks = new HashMap<>();
 
     @SubscribeEvent
     public void onTickEvent(TickEvent.ServerTickEvent event) {
@@ -51,22 +60,42 @@ public class ForgeEventHandlers {
 
         PlayerList list = DimensionManager.getWorld(0).getMinecraftServer().getPlayerList();
         for (EntityPlayerMP player : list.getPlayers()) {
+
+            UUID uuid = player.getUniqueID();
+            BlockPos position = player.getPosition();
+            int chunkX = position.getX() >> 4;
+            int chunkZ = position.getZ() >> 4;
+            ChunkCoord chunkCoord = new ChunkCoord(player.getEntityWorld().provider.getDimension(), chunkX, chunkZ);
+            boolean entered = false;
+
+            if (!playerChunks.containsKey(uuid)) {
+                playerChunks.put(uuid, chunkCoord);
+            } else {
+                ChunkCoord oldPos = playerChunks.get(uuid);
+                if (!oldPos.equals(chunkCoord)) {
+                    // Newly entered chunk
+                    System.out.println("chunkCoord = " + chunkCoord);
+                    playerChunks.put(uuid, chunkCoord);
+                    entered = true;
+                }
+            }
+
+
             IChunkGenerator v = ((WorldServer) player.getEntityWorld()).getChunkProvider().chunkGenerator;
             if (v instanceof ILostChunkGenerator) {
-                handleSpawn(player, (ILostChunkGenerator) v);
+                handleSpawn(player, (ILostChunkGenerator) v, entered);
             }
         }
     }
 
-    private boolean isHaunted(int chunkX, int chunkZ, World world, String buildingType) {
+    private boolean isHaunted(LostChunkData data, String buildingType) {
         if (Config.getExcludedBuildings().contains(buildingType)) {
             return false;
         }
-        LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
         return data.isHaunted() && data.getNumberKilled() < data.getMaxMobs();
     }
 
-    private void handleSpawn(EntityPlayerMP player, ILostChunkGenerator lost) {
+    private void handleSpawn(EntityPlayerMP player, ILostChunkGenerator lost, boolean entered) {
         BlockPos position = player.getPosition();
         int chunkX = position.getX() >> 4;
         int chunkZ = position.getZ() >> 4;
@@ -75,7 +104,25 @@ public class ForgeEventHandlers {
         if (buildingType != null) {
             // We have a building
             World world = player.getEntityWorld();
-            if (isHaunted(chunkX, chunkZ, world, buildingType)) {
+            LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
+            if (isHaunted(data, buildingType)) {
+                if (entered) {
+                    data.enterBuilding();
+                    LostSoulData.getData(world).save(world);
+                    int enteredCount = data.getEnteredCount();
+                    if (enteredCount == 1 && Config.ANNOUNCE_ENTER) {
+                        // First time
+                        player.sendMessage(new TextComponentString(TextFormatting.YELLOW + "This building is haunted. Be careful!"));
+                    }
+                    if (enteredCount == 1) {
+                        executeCommands(player, world, Config.COMMAND_FIRSTTIME);
+                    }
+                    if (enteredCount > 1) {
+                        executeCommands(player, world, Config.COMMAND_ENTERED);
+                    }
+                }
+
+
                 int realHeight = lost.getRealHeight(chunkInfo.getCityLevel());
 
                 // Restrict spawning to roughly the dimensions of the building
@@ -114,6 +161,16 @@ public class ForgeEventHandlers {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void executeCommands(EntityPlayerMP player, World world, String[] commands) {
+        if (commands.length > 0) {
+            CommandSenderWrapper sender = CommandSenderWrapper.create(player).withPermissionLevel(4);
+            MinecraftServer server = world.getMinecraftServer();
+            for (String cmd : commands) {
+                server.commandManager.executeCommand(sender, cmd);
             }
         }
     }
@@ -199,6 +256,7 @@ public class ForgeEventHandlers {
                         if (Config.ANNOUNCE_CLEARED) {
                             if (data.getNumberKilled() == data.getMaxMobs()) {
                                 source.sendMessage(new TextComponentString(TextFormatting.GREEN + "The building feels a lot safer now!"));
+                                executeCommands((EntityPlayerMP) source, source.getEntityWorld(), Config.COMMAND_CLEARED);
                             } else if (data.getNumberKilled() == data.getMaxMobs() / 2) {
                                 source.sendMessage(new TextComponentString(TextFormatting.YELLOW + "About half way there! Keep going!"));
                             }

@@ -23,6 +23,7 @@ public class Config {
     public static boolean CHECK_VALID_SPAWN = false;
 
     public static boolean ANNOUNCE_CLEARED = true;
+    public static boolean ANNOUNCE_ENTER = true;
 
     private static String[] EXCLUDED_BUILDINGS = new String[]{};
     private static String[] MOBS = new String[] { ".3=minecraft:zombie", ".3=minecraft:spider", ".3=minecraft:skeleton", ".2=minecraft:husk", ".2=minecraft:stray", ".1=minecraft:witch", ".1=minecraft:enderman" };
@@ -41,6 +42,10 @@ public class Config {
     private static List<Pair<Float, String>> randomLeggings = null;
     private static List<Pair<Float, String>> randomBoots = null;
     private static List<Pair<Float, String>> randomEffects = null;
+
+    public static String[] COMMAND_FIRSTTIME = new String[] {};
+    public static String[] COMMAND_ENTERED = new String[] {};
+    public static String[] COMMAND_CLEARED = new String[] {};
 
     public static Set<String> getExcludedBuildings() {
         if (excludedBuildings == null) {
@@ -135,6 +140,7 @@ public class Config {
         EXCLUDED_BUILDINGS = cfg.getStringList("excludedBuildings", CATEGORY_GENERAL, EXCLUDED_BUILDINGS, "List of building names where this mod will not spawn mobs");
         CHECK_VALID_SPAWN = cfg.getBoolean("checkValidSpawn", CATEGORY_GENERAL, CHECK_VALID_SPAWN, "If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level");
         ANNOUNCE_CLEARED = cfg.getBoolean("announceCleared", CATEGORY_GENERAL, ANNOUNCE_CLEARED, "If this is true then the player will be notified when a building is cleared");
+        ANNOUNCE_ENTER = cfg.getBoolean("announceEnter", CATEGORY_GENERAL, ANNOUNCE_ENTER, "If this is true then the player will be notified when he or she enters a haunted building");
         MOBS = cfg.getStringList("mobs", CATEGORY_GENERAL, MOBS, "List of mobs that can spawn in buildings together with their rarity");
         RANDOM_WEAPONS = cfg.getStringList("randomWeapons", CATEGORY_GENERAL, RANDOM_WEAPONS, "List of weapons that the mobs can have together with their rarity");
         RANDOM_HELMETS = cfg.getStringList("randomHelmets", CATEGORY_GENERAL, RANDOM_HELMETS, "List of helmets that the mobs can have together with their rarity");
@@ -142,5 +148,8 @@ public class Config {
         RANDOM_LEGGINGS = cfg.getStringList("randomLeggings", CATEGORY_GENERAL, RANDOM_LEGGINGS, "List of leggings that the mobs can have together with their rarity");
         RANDOM_BOOTS = cfg.getStringList("randomBoots", CATEGORY_GENERAL, RANDOM_BOOTS, "List of boots that the mobs can have together with their rarity");
         RANDOM_EFFECTS = cfg.getStringList("randomEffects", CATEGORY_GENERAL, RANDOM_EFFECTS, "List of effects that a mob can have. Note that multiple effects are possible");
+        COMMAND_FIRSTTIME = cfg.getStringList("commandFirstTime", CATEGORY_GENERAL, COMMAND_FIRSTTIME, "List of console commands to execute the first time a building is entered");
+        COMMAND_ENTERED = cfg.getStringList("commandEntered", CATEGORY_GENERAL, COMMAND_ENTERED, "List of console commands to execute every time a building is entered");
+        COMMAND_CLEARED = cfg.getStringList("commandCleared", CATEGORY_GENERAL, COMMAND_CLEARED, "List of console commands to execute when a building is cleared");
     }
 }
