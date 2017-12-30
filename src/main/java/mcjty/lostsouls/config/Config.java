@@ -22,8 +22,12 @@ public class Config {
     public static float MAX_DAMAGE_BONUS = 5f;
     public static boolean CHECK_VALID_SPAWN = false;
 
+    public static boolean LOCK_CHESTS_UNTIL_CLEARED = true;
+    public static boolean LOCK_ONLY_CHESTS = true;
+
     public static boolean ANNOUNCE_CLEARED = true;
     public static boolean ANNOUNCE_ENTER = true;
+    public static boolean ANNOUNCE_CHESTLOCKED = true;
 
     private static String[] EXCLUDED_BUILDINGS = new String[]{};
     private static String[] MOBS = new String[] { ".3=minecraft:zombie", ".3=minecraft:spider", ".3=minecraft:skeleton", ".2=minecraft:husk", ".2=minecraft:stray", ".1=minecraft:witch", ".1=minecraft:enderman" };
@@ -141,6 +145,9 @@ public class Config {
         CHECK_VALID_SPAWN = cfg.getBoolean("checkValidSpawn", CATEGORY_GENERAL, CHECK_VALID_SPAWN, "If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level");
         ANNOUNCE_CLEARED = cfg.getBoolean("announceCleared", CATEGORY_GENERAL, ANNOUNCE_CLEARED, "If this is true then the player will be notified when a building is cleared");
         ANNOUNCE_ENTER = cfg.getBoolean("announceEnter", CATEGORY_GENERAL, ANNOUNCE_ENTER, "If this is true then the player will be notified when he or she enters a haunted building");
+        ANNOUNCE_CHESTLOCKED = cfg.getBoolean("announceChestLocked", CATEGORY_GENERAL, ANNOUNCE_CHESTLOCKED, "If this is true then the player will get a message when he/she tries to open a locked chest");
+        LOCK_CHESTS_UNTIL_CLEARED = cfg.getBoolean("lockChestsUntilCleared", CATEGORY_GENERAL, LOCK_CHESTS_UNTIL_CLEARED, "If this is true then all chests will be locked until the building is cleared");
+        LOCK_ONLY_CHESTS = cfg.getBoolean("lockOnlyChests", CATEGORY_GENERAL, LOCK_ONLY_CHESTS, "This option is only useful when 'lockChestsUntilCleared'. If true only vanilla chests will be locked. Otherwise all tile entities are locked");
         MOBS = cfg.getStringList("mobs", CATEGORY_GENERAL, MOBS, "List of mobs that can spawn in buildings together with their rarity");
         RANDOM_WEAPONS = cfg.getStringList("randomWeapons", CATEGORY_GENERAL, RANDOM_WEAPONS, "List of weapons that the mobs can have together with their rarity");
         RANDOM_HELMETS = cfg.getStringList("randomHelmets", CATEGORY_GENERAL, RANDOM_HELMETS, "List of helmets that the mobs can have together with their rarity");

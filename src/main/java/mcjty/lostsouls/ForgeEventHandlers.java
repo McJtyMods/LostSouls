@@ -22,6 +22,8 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -33,6 +35,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -49,6 +52,26 @@ public class ForgeEventHandlers {
 
     // This map keeps the last known chunk position for every player
     private Map<UUID, ChunkCoord> playerChunks = new HashMap<>();
+
+    @SubscribeEvent
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        World world = event.getWorld();
+        if (Config.LOCK_CHESTS_UNTIL_CLEARED && !world.isRemote) {
+            BlockPos pos = event.getPos();
+            TileEntity te = world.getTileEntity(pos);
+            if ((Config.LOCK_ONLY_CHESTS && te instanceof TileEntityChest) || ((!Config.LOCK_ONLY_CHESTS && te != null))) {
+                int chunkX = pos.getX() >> 4;
+                int chunkZ = pos.getZ() >> 4;
+                LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
+                if (data.isHaunted()) {
+                    event.setCanceled(true);
+                    if (Config.ANNOUNCE_CHESTLOCKED) {
+                        event.getEntityPlayer().sendMessage(new TextComponentString(TextFormatting.YELLOW + "The building isn't safe enough!"));
+                    }
+                }
+            }
+        }
+    }
 
     @SubscribeEvent
     public void onTickEvent(TickEvent.ServerTickEvent event) {
@@ -70,11 +93,11 @@ public class ForgeEventHandlers {
 
             if (!playerChunks.containsKey(uuid)) {
                 playerChunks.put(uuid, chunkCoord);
+                entered = true;
             } else {
                 ChunkCoord oldPos = playerChunks.get(uuid);
                 if (!oldPos.equals(chunkCoord)) {
                     // Newly entered chunk
-                    System.out.println("chunkCoord = " + chunkCoord);
                     playerChunks.put(uuid, chunkCoord);
                     entered = true;
                 }
