@@ -66,7 +66,7 @@ public class ForgeEventHandlers {
                 if (data.isHaunted()) {
                     event.setCanceled(true);
                     if (Config.ANNOUNCE_CHESTLOCKED) {
-                        event.getEntityPlayer().sendMessage(new TextComponentString(TextFormatting.YELLOW + "The building isn't safe enough!"));
+                        event.getEntityPlayer().sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_UNSAFE_BUILDING));
                     }
                 }
             }
@@ -135,7 +135,7 @@ public class ForgeEventHandlers {
                     int enteredCount = data.getEnteredCount();
                     if (enteredCount == 1 && Config.ANNOUNCE_ENTER) {
                         // First time
-                        player.sendMessage(new TextComponentString(TextFormatting.YELLOW + "This building is haunted. Be careful!"));
+                        player.sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_BUILDING_HAUNTED));
                     }
                     if (enteredCount == 1) {
                         executeCommands(player, world, Config.COMMAND_FIRSTTIME);
@@ -278,10 +278,10 @@ public class ForgeEventHandlers {
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED) {
                             if (data.getNumberKilled() == data.getMaxMobs()) {
-                                source.sendMessage(new TextComponentString(TextFormatting.GREEN + "The building feels a lot safer now!"));
+                                source.sendMessage(new TextComponentString(TextFormatting.GREEN + Config.MESSAGE_BUILDING_CLEARED));
                                 executeCommands((EntityPlayerMP) source, source.getEntityWorld(), Config.COMMAND_CLEARED);
                             } else if (data.getNumberKilled() == data.getMaxMobs() / 2) {
-                                source.sendMessage(new TextComponentString(TextFormatting.YELLOW + "About half way there! Keep going!"));
+                                source.sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_BUILDING_HALFWAY));
                             }
                         }
                         LostSoulData.getData(event.getEntity().world).save(event.getEntity().world);

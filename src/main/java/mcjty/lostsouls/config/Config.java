@@ -51,6 +51,11 @@ public class Config {
     public static String[] COMMAND_ENTERED = new String[] {};
     public static String[] COMMAND_CLEARED = new String[] {};
 
+    public static String MESSAGE_UNSAFE_BUILDING = "The building isn't safe enough!";
+    public static String MESSAGE_BUILDING_HAUNTED = "This building is haunted. Be careful!";
+    public static String MESSAGE_BUILDING_CLEARED = "The building feels a lot safer now!";
+    public static String MESSAGE_BUILDING_HALFWAY = "About half way there! Keep going!";
+
     public static Set<String> getExcludedBuildings() {
         if (excludedBuildings == null) {
             excludedBuildings = new HashSet<>();
@@ -155,8 +160,14 @@ public class Config {
         RANDOM_LEGGINGS = cfg.getStringList("randomLeggings", CATEGORY_GENERAL, RANDOM_LEGGINGS, "List of leggings that the mobs can have together with their rarity");
         RANDOM_BOOTS = cfg.getStringList("randomBoots", CATEGORY_GENERAL, RANDOM_BOOTS, "List of boots that the mobs can have together with their rarity");
         RANDOM_EFFECTS = cfg.getStringList("randomEffects", CATEGORY_GENERAL, RANDOM_EFFECTS, "List of effects that a mob can have. Note that multiple effects are possible");
+
         COMMAND_FIRSTTIME = cfg.getStringList("commandFirstTime", CATEGORY_GENERAL, COMMAND_FIRSTTIME, "List of console commands to execute the first time a building is entered");
         COMMAND_ENTERED = cfg.getStringList("commandEntered", CATEGORY_GENERAL, COMMAND_ENTERED, "List of console commands to execute every time a building is entered");
         COMMAND_CLEARED = cfg.getStringList("commandCleared", CATEGORY_GENERAL, COMMAND_CLEARED, "List of console commands to execute when a building is cleared");
+
+        MESSAGE_UNSAFE_BUILDING = cfg.getString("messageUnsafeBuilding", CATEGORY_GENERAL, MESSAGE_UNSAFE_BUILDING, "This message is given when the player tries to open a chest in a haunted building");
+        MESSAGE_BUILDING_HAUNTED = cfg.getString("messageBuildingHaunted", CATEGORY_GENERAL, MESSAGE_BUILDING_HAUNTED, "This message is given when the player enters a haunted building for the first time");
+        MESSAGE_BUILDING_CLEARED = cfg.getString("messageBuildingCleared", CATEGORY_GENERAL, MESSAGE_BUILDING_CLEARED, "This message is given when the player clears a building");
+        MESSAGE_BUILDING_HALFWAY = cfg.getString("messageBuildingHalfway", CATEGORY_GENERAL, MESSAGE_BUILDING_HALFWAY, "This message is given when the player is halfway clearing a building");
     }
 }
