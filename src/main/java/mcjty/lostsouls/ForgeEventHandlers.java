@@ -57,16 +57,21 @@ public class ForgeEventHandlers {
     public void onPlayerInteract(PlayerInteractEvent event) {
         World world = event.getWorld();
         if (Config.LOCK_CHESTS_UNTIL_CLEARED && !world.isRemote) {
-            BlockPos pos = event.getPos();
-            TileEntity te = world.getTileEntity(pos);
-            if ((Config.LOCK_ONLY_CHESTS && te instanceof TileEntityChest) || ((!Config.LOCK_ONLY_CHESTS && te != null))) {
-                int chunkX = pos.getX() >> 4;
-                int chunkZ = pos.getZ() >> 4;
-                LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
-                if (data.isHaunted()) {
-                    event.setCanceled(true);
-                    if (Config.ANNOUNCE_CHESTLOCKED) {
-                        event.getEntityPlayer().sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_UNSAFE_BUILDING));
+            IChunkGenerator v = ((WorldServer) world).getChunkProvider().chunkGenerator;
+            if (v instanceof ILostChunkGenerator) {
+                BlockPos pos = event.getPos();
+                TileEntity te = world.getTileEntity(pos);
+                if ((Config.LOCK_ONLY_CHESTS && te instanceof TileEntityChest) || ((!Config.LOCK_ONLY_CHESTS && te != null))) {
+                    int chunkX = pos.getX() >> 4;
+                    int chunkZ = pos.getZ() >> 4;
+                    LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
+                    ILostChunkInfo chunkInfo = ((ILostChunkGenerator) v).getChunkInfo(chunkX, chunkZ);
+                    String buildingType = chunkInfo.getBuildingType();
+                    if (isHaunted(data, buildingType)) {
+                        event.setCanceled(true);
+                        if (Config.ANNOUNCE_CHESTLOCKED) {
+                            event.getEntityPlayer().sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_UNSAFE_BUILDING));
+                        }
                     }
                 }
             }
@@ -112,6 +117,9 @@ public class ForgeEventHandlers {
     }
 
     private boolean isHaunted(LostChunkData data, String buildingType) {
+        if (buildingType == null) {
+            return false;
+        }
         if (Config.getExcludedBuildings().contains(buildingType)) {
             return false;
         }
