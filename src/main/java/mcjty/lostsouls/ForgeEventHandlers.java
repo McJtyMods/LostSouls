@@ -198,7 +198,12 @@ public class ForgeEventHandlers {
 
     private void executeCommands(EntityPlayerMP player, World world, String[] commands) {
         if (commands.length > 0) {
-            CommandSenderWrapper sender = CommandSenderWrapper.create(player).withPermissionLevel(4);
+            CommandSenderWrapper sender = new CommandSenderWrapper(player, player.getPositionVector(), player.getPosition(), 4, player, null) {
+                @Override
+                public boolean canUseCommand(int permLevel, String commandName) {
+                    return true;
+                }
+            };
             MinecraftServer server = world.getMinecraftServer();
             for (String cmd : commands) {
                 server.commandManager.executeCommand(sender, cmd);
