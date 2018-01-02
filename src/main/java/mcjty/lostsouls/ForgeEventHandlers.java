@@ -148,7 +148,7 @@ public class ForgeEventHandlers {
                     if (enteredCount == 1) {
                         executeCommands(player, world, Config.COMMAND_FIRSTTIME);
                     }
-                    if (enteredCount > 1) {
+                    if (enteredCount >= 1) {
                         executeCommands(player, world, Config.COMMAND_ENTERED);
                     }
                 }
