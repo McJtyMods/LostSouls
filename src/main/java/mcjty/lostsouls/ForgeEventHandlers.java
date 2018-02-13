@@ -13,7 +13,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
@@ -64,7 +63,7 @@ public class ForgeEventHandlers {
                 if ((Config.LOCK_ONLY_CHESTS && te instanceof TileEntityChest) || ((!Config.LOCK_ONLY_CHESTS && te != null))) {
                     int chunkX = pos.getX() >> 4;
                     int chunkZ = pos.getZ() >> 4;
-                    LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
+                    LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ, (ILostChunkGenerator) v);
                     ILostChunkInfo chunkInfo = ((ILostChunkGenerator) v).getChunkInfo(chunkX, chunkZ);
                     String buildingType = chunkInfo.getBuildingType();
                     if (isHaunted(data, buildingType)) {
@@ -123,7 +122,7 @@ public class ForgeEventHandlers {
         if (Config.getExcludedBuildings().contains(buildingType)) {
             return false;
         }
-        return data.isHaunted() && data.getNumberKilled() < data.getMaxMobs();
+        return data.isHaunted() && data.getNumberKilled() < data.getTotalMobs();
     }
 
     private void handleSpawn(EntityPlayerMP player, ILostChunkGenerator lost, boolean entered) {
@@ -135,7 +134,7 @@ public class ForgeEventHandlers {
         if (buildingType != null) {
             // We have a building
             World world = player.getEntityWorld();
-            LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ);
+            LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ, lost);
             if (isHaunted(data, buildingType)) {
                 if (entered) {
                     data.enterBuilding();
@@ -279,7 +278,7 @@ public class ForgeEventHandlers {
     @SubscribeEvent
     public void onKill(LivingDeathEvent event) {
         Entity source = event.getSource().getTrueSource();
-        if (source instanceof EntityPlayer) {
+        if (source instanceof EntityPlayerMP) {
             for (String tag : event.getEntity().getTags()) {
                 if (tag.startsWith("_ls_:")) {
                     String[] split = StringUtils.split(tag, ':');
@@ -287,13 +286,14 @@ public class ForgeEventHandlers {
                         int dim = Integer.parseInt(split[1]);
                         int x = Integer.parseInt(split[2]);
                         int z = Integer.parseInt(split[3]);
-                        LostChunkData data = LostSoulData.getSoulData(event.getEntity().world, dim, x, z);
+                        // Should be in the cache, so we don't need a provider
+                        LostChunkData data = LostSoulData.getSoulData(event.getEntity().world, dim, x, z, null);
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED) {
-                            if (data.getNumberKilled() == data.getMaxMobs()) {
+                            if (data.getNumberKilled() == data.getTotalMobs()) {
                                 source.sendMessage(new TextComponentString(TextFormatting.GREEN + Config.MESSAGE_BUILDING_CLEARED));
                                 executeCommands((EntityPlayerMP) source, source.getEntityWorld(), Config.COMMAND_CLEARED);
-                            } else if (data.getNumberKilled() == data.getMaxMobs() / 2) {
+                            } else if (data.getNumberKilled() == data.getTotalMobs() / 2) {
                                 source.sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_BUILDING_HALFWAY));
                             }
                         }

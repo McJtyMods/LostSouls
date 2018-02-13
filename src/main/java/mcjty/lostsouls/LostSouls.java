@@ -1,6 +1,7 @@
 package mcjty.lostsouls;
 
 import mcjty.lostsouls.commands.CommandDebug;
+import mcjty.lostsouls.commands.CommandSetHaunt;
 import mcjty.lostsouls.data.LostSoulData;
 import mcjty.lostsouls.proxy.CommonProxy;
 import net.minecraftforge.fml.common.Mod;
@@ -50,6 +51,7 @@ public class LostSouls {
     @Mod.EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandDebug());
+        event.registerServerCommand(new CommandSetHaunt());
     }
 
     @Mod.EventHandler

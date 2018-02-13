@@ -13,11 +13,11 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-public class CommandDebug implements ICommand {
+public class CommandSetHaunt implements ICommand {
 
     @Override
     public String getName() {
-        return "ls_debug";
+        return "ls_sethaunt <todo>";
     }
 
     @Override
@@ -33,12 +33,14 @@ public class CommandDebug implements ICommand {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (sender instanceof EntityPlayer) {
+            String arg0 = args[0].toLowerCase();
+            Integer todo = Integer.parseInt(arg0);
+
             EntityPlayer player = (EntityPlayer) sender;
             BlockPos position = player.getPosition();
             LostChunkData soulData = LostSoulData.getSoulData(player.getEntityWorld(), player.getEntityWorld().provider.getDimension(), position.getX() >> 4, position.getZ() >> 4, null);
-            System.out.println("soulData.isHaunted() = " + soulData.isHaunted());
-            System.out.println("soulData.getMaxMobs() = " + soulData.getTotalMobs());
-            System.out.println("soulData.getNumberKilled() = " + soulData.getNumberKilled());
+            soulData.setNumberKilled(todo);
+            LostSoulData.getData(player.world).save(player.world);
         }
     }
 
@@ -46,7 +48,6 @@ public class CommandDebug implements ICommand {
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
         return server.canUseCommand(2, getName());
     }
-
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {

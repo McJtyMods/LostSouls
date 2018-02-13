@@ -1,7 +1,9 @@
 package mcjty.lostsouls.data;
 
+import mcjty.lostcities.api.ILostChunkGenerator;
+import mcjty.lostcities.api.ILostChunkInfo;
 import mcjty.lostcities.varia.ChunkCoord;
-import net.minecraft.nbt.NBTBase;
+import mcjty.lostsouls.config.Config;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -9,6 +11,7 @@ import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,15 +54,26 @@ public class LostSoulData extends WorldSavedData {
     }
 
     @Nonnull
-    public static LostChunkData getSoulData(World world, int dimension, int chunkX, int chunkZ) {
+    public static LostChunkData getSoulData(World world, int dimension, int chunkX, int chunkZ, @Nullable ILostChunkGenerator lost) {
         LostSoulData data = getData(world);
         ChunkCoord cc = new ChunkCoord(dimension, chunkX, chunkZ);
-        return data.getSoulData(world, cc);
+        return data.getSoulData(world, cc, lost);
     }
 
-    private LostChunkData getSoulData(World world, ChunkCoord cc) {
+    private LostChunkData getSoulData(World world, ChunkCoord cc, @Nullable ILostChunkGenerator lost) {
         if (!lostChunkDataMap.containsKey(cc)) {
-            lostChunkDataMap.put(cc, new LostChunkData(cc));
+            LostChunkData data = new LostChunkData(cc);
+            if (lost == null) {
+                data.initialize(cc, Config.HAUNTED_CHANCE, Config.MIN_MOBS, Config.MAX_MOBS);
+            } else {
+                ILostChunkInfo info = lost.getChunkInfo(cc.getChunkX(), cc.getChunkZ());
+                if (info.getSphere() != null) {
+                    data.initialize(cc, Config.SPHERE_HAUNTED_CHANCE, Config.SPHERE_MIN_MOBS, Config.SPHERE_MAX_MOBS);
+                } else {
+                    data.initialize(cc, Config.HAUNTED_CHANCE, Config.MIN_MOBS, Config.MAX_MOBS);
+                }
+            }
+            lostChunkDataMap.put(cc, data);
             save(world);
         }
         return lostChunkDataMap.get(cc);

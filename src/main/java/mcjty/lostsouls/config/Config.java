@@ -13,9 +13,14 @@ public class Config {
     public static int SERVERTICK_TIMEOUT = 200;
     public static int SPAWN_MAX_NEARBY = 6;
     public static float MIN_SPAWN_DISTANCE = 8.0f;
+
     public static float HAUNTED_CHANCE = 0.8f;
     public static int MIN_MOBS = 10;
     public static int MAX_MOBS = 50;
+    public static float SPHERE_HAUNTED_CHANCE = 0.8f;
+    public static int SPHERE_MIN_MOBS = 10;
+    public static int SPHERE_MAX_MOBS = 50;
+
     public static float MIN_HEALTH_BONUS = 2f;
     public static float MAX_HEALTH_BONUS = 5f;
     public static float MIN_DAMAGE_BONUS = 2f;
@@ -138,14 +143,19 @@ public class Config {
 
         SERVERTICK_TIMEOUT = cfg.getInt("serverTickTimeout", CATEGORY_GENERAL, SERVERTICK_TIMEOUT, 1, 1000000, "The amount of ticks that the server waits before checking for new spawns");
         SPAWN_MAX_NEARBY = cfg.getInt("spawnMaxNearby", CATEGORY_GENERAL, SPAWN_MAX_NEARBY, 1, 200, "The maximum amount of entities that can spawn near each other (of the same type)");
-        MIN_MOBS = cfg.getInt("minMobs", CATEGORY_GENERAL, MIN_MOBS, 1, 10000, "The minimum amount of mobs that are spawned by a haunted building");
-        MAX_MOBS = cfg.getInt("maxMobs", CATEGORY_GENERAL, MAX_MOBS, 1, 10000, "The maximum amount of mobs that are spawned by a haunted building");
         MIN_SPAWN_DISTANCE = cfg.getFloat("minSpawnDistance", CATEGORY_GENERAL, MIN_SPAWN_DISTANCE, 0, 16, "The minimum distance between the player and newly spawned mobs");
         MIN_HEALTH_BONUS = cfg.getFloat("minHealthBonus", CATEGORY_GENERAL, MIN_HEALTH_BONUS, 0.01f, 10000, "The minimum health bonus that the mob will get");
         MAX_HEALTH_BONUS = cfg.getFloat("maxHealthBonus", CATEGORY_GENERAL, MAX_HEALTH_BONUS, 0.01f, 10000, "The maximum health bonus that the mob will get");
         MIN_DAMAGE_BONUS = cfg.getFloat("minDamageBonus", CATEGORY_GENERAL, MIN_DAMAGE_BONUS, 0.01f, 10000, "The minimum damage bonus that the mob will get");
         MAX_DAMAGE_BONUS = cfg.getFloat("maxDamageBonus", CATEGORY_GENERAL, MAX_DAMAGE_BONUS, 0.01f, 10000, "The maximum damage bonus that the mob will get");
+
         HAUNTED_CHANCE = cfg.getFloat("hauntedChance", CATEGORY_GENERAL, HAUNTED_CHANCE, 0, 1, "The chance that a building is haunted");
+        MIN_MOBS = cfg.getInt("minMobs", CATEGORY_GENERAL, MIN_MOBS, 1, 10000, "The minimum amount of mobs that are spawned by a haunted building");
+        MAX_MOBS = cfg.getInt("maxMobs", CATEGORY_GENERAL, MAX_MOBS, 1, 10000, "The maximum amount of mobs that are spawned by a haunted building");
+        SPHERE_HAUNTED_CHANCE = cfg.getFloat("sphereHauntedChance", CATEGORY_GENERAL, SPHERE_HAUNTED_CHANCE, 0, 1, "The chance that a building is haunted. This version is used in case the building is in a Lost City sphere");
+        SPHERE_MIN_MOBS = cfg.getInt("sphereMinMobs", CATEGORY_GENERAL, SPHERE_MIN_MOBS, 1, 10000, "The minimum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere");
+        SPHERE_MAX_MOBS = cfg.getInt("sphereMaxMobs", CATEGORY_GENERAL, SPHERE_MAX_MOBS, 1, 10000, "The maximum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere");
+
         EXCLUDED_BUILDINGS = cfg.getStringList("excludedBuildings", CATEGORY_GENERAL, EXCLUDED_BUILDINGS, "List of building names where this mod will not spawn mobs");
         CHECK_VALID_SPAWN = cfg.getBoolean("checkValidSpawn", CATEGORY_GENERAL, CHECK_VALID_SPAWN, "If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level");
         ANNOUNCE_CLEARED = cfg.getBoolean("announceCleared", CATEGORY_GENERAL, ANNOUNCE_CLEARED, "If this is true then the player will be notified when a building is cleared");
