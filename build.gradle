@@ -77,7 +77,7 @@ dependencies {
     deobfCompile "mezz.jei:jei_1.12:4.7.0.67"
     deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.10-4"
     deobfCompile "com.github.mcjty:intwheel:1.12-1.2.7"
-    deobfCompile "com.github.mcjty:lostcities:1.12-2.0.1"
+    deobfCompile "com.github.mcjty:lostcities:1.12-2.0.3"
     //deobfCompile "mcp.mobius.waila:Hwyla:1.8.10-B23_1.11:api"
     //deobfCompile "mcjty.theoneprobe:TheOneProbe:1.1x-1.4.7-57"
     //deobfCompile "team.chisel:Chisel:MC1.11.2-0.0.10.14"
