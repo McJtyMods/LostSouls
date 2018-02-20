@@ -1,5 +1,6 @@
 package mcjty.lostsouls;
 
+import mcjty.lostcities.api.ILostCities;
 import mcjty.lostsouls.commands.CommandDebug;
 import mcjty.lostsouls.commands.CommandSetHaunt;
 import mcjty.lostsouls.data.LostSoulData;
@@ -8,6 +9,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
 import org.apache.logging.log4j.Logger;
+
+import javax.annotation.Nullable;
+import java.util.function.Function;
 
 @Mod(modid = LostSouls.MODID, name = "Lost Souls",
         dependencies =
@@ -28,6 +32,8 @@ public class LostSouls {
     @Mod.Instance("lostsouls")
     public static LostSouls instance;
 
+    public static ILostCities lostCities;
+
     public static Logger logger;
 
     /**
@@ -38,6 +44,8 @@ public class LostSouls {
     public void preInit(FMLPreInitializationEvent e) {
         logger = e.getModLog();
         this.proxy.preInit(e);
+
+        FMLInterModComms.sendFunctionMessage("lostcities", "getLostCities", "mcjty.lostsouls.LostSouls$GetLostCities");
     }
 
     /**
@@ -66,4 +74,14 @@ public class LostSouls {
     public void postInit(FMLPostInitializationEvent e) {
         this.proxy.postInit(e);
     }
+
+    public static class GetLostCities implements Function<ILostCities, Void> {
+        @Nullable
+        @Override
+        public Void apply(ILostCities lc) {
+            lostCities = lc;
+            return null;
+        }
+    }
+
 }

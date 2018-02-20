@@ -30,8 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -56,15 +54,15 @@ public class ForgeEventHandlers {
     public void onPlayerInteract(PlayerInteractEvent event) {
         World world = event.getWorld();
         if (Config.LOCK_CHESTS_UNTIL_CLEARED && !world.isRemote) {
-            IChunkGenerator v = ((WorldServer) world).getChunkProvider().chunkGenerator;
-            if (v instanceof ILostChunkGenerator) {
+            ILostChunkGenerator generator = LostSouls.lostCities.getLostGenerator(world.provider.getDimension());
+            if (generator != null) {
                 BlockPos pos = event.getPos();
                 TileEntity te = world.getTileEntity(pos);
                 if ((Config.LOCK_ONLY_CHESTS && te instanceof TileEntityChest) || ((!Config.LOCK_ONLY_CHESTS && te != null))) {
                     int chunkX = pos.getX() >> 4;
                     int chunkZ = pos.getZ() >> 4;
-                    LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ, (ILostChunkGenerator) v);
-                    ILostChunkInfo chunkInfo = ((ILostChunkGenerator) v).getChunkInfo(chunkX, chunkZ);
+                    LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ, generator);
+                    ILostChunkInfo chunkInfo = generator.getChunkInfo(chunkX, chunkZ);
                     String buildingType = chunkInfo.getBuildingType();
                     if (isHaunted(data, buildingType)) {
                         event.setCanceled(true);
@@ -108,9 +106,9 @@ public class ForgeEventHandlers {
             }
 
 
-            IChunkGenerator v = ((WorldServer) player.getEntityWorld()).getChunkProvider().chunkGenerator;
-            if (v instanceof ILostChunkGenerator) {
-                handleSpawn(player, (ILostChunkGenerator) v, entered);
+            ILostChunkGenerator generator = LostSouls.lostCities.getLostGenerator(player.getEntityWorld().provider.getDimension());
+            if (generator != null) {
+                handleSpawn(player, generator, entered);
             }
         }
     }
