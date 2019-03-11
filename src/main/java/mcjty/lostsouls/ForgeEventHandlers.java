@@ -2,9 +2,10 @@ package mcjty.lostsouls;
 
 import mcjty.lostcities.api.ILostChunkGenerator;
 import mcjty.lostcities.api.ILostChunkInfo;
-import mcjty.lostsouls.config.Config;
+import mcjty.lostsouls.config.ConfigSetup;
 import mcjty.lostsouls.data.LostChunkData;
 import mcjty.lostsouls.data.LostSoulData;
+import mcjty.lostsouls.setup.ModSetup;
 import mcjty.lostsouls.varia.ChunkCoord;
 import mcjty.lostsouls.varia.Tools;
 import net.minecraft.command.CommandSenderWrapper;
@@ -45,7 +46,7 @@ import java.util.UUID;
 
 public class ForgeEventHandlers {
 
-    public static int timeout = Config.SERVERTICK_TIMEOUT;
+    public static int timeout = ConfigSetup.SERVERTICK_TIMEOUT;
 
     // This map keeps the last known chunk position for every player
     private Map<UUID, ChunkCoord> playerChunks = new HashMap<>();
@@ -53,12 +54,12 @@ public class ForgeEventHandlers {
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent event) {
         World world = event.getWorld();
-        if (Config.LOCK_CHESTS_UNTIL_CLEARED && !world.isRemote) {
-            ILostChunkGenerator generator = LostSouls.lostCities.getLostGenerator(world.provider.getDimension());
+        if (ConfigSetup.LOCK_CHESTS_UNTIL_CLEARED && !world.isRemote) {
+            ILostChunkGenerator generator = ModSetup.lostCities.getLostGenerator(world.provider.getDimension());
             if (generator != null) {
                 BlockPos pos = event.getPos();
                 TileEntity te = world.getTileEntity(pos);
-                if ((Config.LOCK_ONLY_CHESTS && te instanceof TileEntityChest) || ((!Config.LOCK_ONLY_CHESTS && te != null))) {
+                if ((ConfigSetup.LOCK_ONLY_CHESTS && te instanceof TileEntityChest) || ((!ConfigSetup.LOCK_ONLY_CHESTS && te != null))) {
                     int chunkX = pos.getX() >> 4;
                     int chunkZ = pos.getZ() >> 4;
                     LostChunkData data = LostSoulData.getSoulData(world, world.provider.getDimension(), chunkX, chunkZ, generator);
@@ -66,8 +67,8 @@ public class ForgeEventHandlers {
                     String buildingType = chunkInfo.getBuildingType();
                     if (isHaunted(data, buildingType)) {
                         event.setCanceled(true);
-                        if (Config.ANNOUNCE_CHESTLOCKED) {
-                            event.getEntityPlayer().sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_UNSAFE_BUILDING));
+                        if (ConfigSetup.ANNOUNCE_CHESTLOCKED) {
+                            event.getEntityPlayer().sendMessage(new TextComponentString(TextFormatting.YELLOW + ConfigSetup.MESSAGE_UNSAFE_BUILDING));
                         }
                     }
                 }
@@ -81,7 +82,7 @@ public class ForgeEventHandlers {
         if (timeout > 0) {
             return;
         }
-        timeout = Config.SERVERTICK_TIMEOUT;
+        timeout = ConfigSetup.SERVERTICK_TIMEOUT;
 
         PlayerList list = DimensionManager.getWorld(0).getMinecraftServer().getPlayerList();
         for (EntityPlayerMP player : list.getPlayers()) {
@@ -106,7 +107,7 @@ public class ForgeEventHandlers {
             }
 
 
-            ILostChunkGenerator generator = LostSouls.lostCities.getLostGenerator(player.getEntityWorld().provider.getDimension());
+            ILostChunkGenerator generator = ModSetup.lostCities.getLostGenerator(player.getEntityWorld().provider.getDimension());
             if (generator != null) {
                 handleSpawn(player, generator, entered);
             }
@@ -117,7 +118,7 @@ public class ForgeEventHandlers {
         if (buildingType == null) {
             return false;
         }
-        if (Config.getExcludedBuildings().contains(buildingType)) {
+        if (ConfigSetup.getExcludedBuildings().contains(buildingType)) {
             return false;
         }
         return data.isHaunted() && data.getNumberKilled() < data.getTotalMobs();
@@ -138,15 +139,15 @@ public class ForgeEventHandlers {
                     data.enterBuilding();
                     LostSoulData.getData(world).save(world);
                     int enteredCount = data.getEnteredCount();
-                    if (enteredCount == 1 && Config.ANNOUNCE_ENTER) {
+                    if (enteredCount == 1 && ConfigSetup.ANNOUNCE_ENTER) {
                         // First time
-                        player.sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_BUILDING_HAUNTED));
+                        player.sendMessage(new TextComponentString(TextFormatting.YELLOW + ConfigSetup.MESSAGE_BUILDING_HAUNTED));
                     }
                     if (enteredCount == 1) {
-                        executeCommands(player, world, Config.COMMAND_FIRSTTIME);
+                        executeCommands(player, world, ConfigSetup.COMMAND_FIRSTTIME);
                     }
                     if (enteredCount >= 1) {
-                        executeCommands(player, world, Config.COMMAND_ENTERED);
+                        executeCommands(player, world, ConfigSetup.COMMAND_ENTERED);
                     }
                 }
 
@@ -171,13 +172,13 @@ public class ForgeEventHandlers {
                     }
                     if (world.isAirBlock(new BlockPos(x, y, z))) {
                         double distance = position.getDistance((int) x, (int) y, (int) z);
-                        if (distance >= Config.MIN_SPAWN_DISTANCE) {
-                            String mob = Tools.getRandomFromList(world.rand, Config.getRandomMobs());
+                        if (distance >= ConfigSetup.MIN_SPAWN_DISTANCE) {
+                            String mob = Tools.getRandomFromList(world.rand, ConfigSetup.getRandomMobs());
                             Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(mob), world);
                             int cnt = world.getEntitiesWithinAABB(entity.getClass(), (new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1).grow(8.0))).size();
-                            if (cnt <= Config.SPAWN_MAX_NEARBY) {
+                            if (cnt <= ConfigSetup.SPAWN_MAX_NEARBY) {
                                 entity.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
-                                if (!Config.CHECK_VALID_SPAWN || ((EntityLiving) entity).getCanSpawnHere()) {
+                                if (!ConfigSetup.CHECK_VALID_SPAWN || ((EntityLiving) entity).getCanSpawnHere()) {
                                     if (((EntityLiving) entity).isNotColliding()) {
                                         boostEntity(world, (EntityLiving) entity);
 
@@ -211,19 +212,19 @@ public class ForgeEventHandlers {
     private void boostEntity(World world, EntityLiving entity) {
         IAttributeInstance entityAttribute = entity.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
         if (entityAttribute != null) {
-            float f = world.rand.nextFloat() * (Config.MAX_HEALTH_BONUS - Config.MIN_HEALTH_BONUS) + Config.MIN_HEALTH_BONUS;
+            float f = world.rand.nextFloat() * (ConfigSetup.MAX_HEALTH_BONUS - ConfigSetup.MIN_HEALTH_BONUS) + ConfigSetup.MIN_HEALTH_BONUS;
             double newMax = entityAttribute.getBaseValue() * f;
             entityAttribute.setBaseValue(newMax);
             entity.setHealth((float) newMax);
         }
         entityAttribute = entity.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
         if (entityAttribute != null) {
-            float f = world.rand.nextFloat() * (Config.MAX_DAMAGE_BONUS - Config.MIN_DAMAGE_BONUS) + Config.MIN_DAMAGE_BONUS;
+            float f = world.rand.nextFloat() * (ConfigSetup.MAX_DAMAGE_BONUS - ConfigSetup.MIN_DAMAGE_BONUS) + ConfigSetup.MIN_DAMAGE_BONUS;
             double newMax = entityAttribute.getBaseValue() * f;
             entityAttribute.setBaseValue(newMax);
         }
 
-        for (Pair<Float, String> pair : Config.getRandomEffects()) {
+        for (Pair<Float, String> pair : ConfigSetup.getRandomEffects()) {
             if (world.rand.nextFloat() < pair.getLeft()) {
                 String s = pair.getRight();
                 String[] split = StringUtils.split(s, ',');
@@ -236,35 +237,35 @@ public class ForgeEventHandlers {
             }
         }
 
-        String weapon = Tools.getRandomFromList(world.rand, Config.getRandomWeapons());
+        String weapon = Tools.getRandomFromList(world.rand, ConfigSetup.getRandomWeapons());
         if (!"null".equals(weapon)) {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(weapon));
             if (item != null) {
                 entity.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(item));
             }
         }
-        String helmet = Tools.getRandomFromList(world.rand, Config.getRandomHelmets());
+        String helmet = Tools.getRandomFromList(world.rand, ConfigSetup.getRandomHelmets());
         if (!"null".equals(helmet)) {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(helmet));
             if (item != null) {
                 entity.setItemStackToSlot(EntityEquipmentSlot.HEAD, new ItemStack(item));
             }
         }
-        String chestplate = Tools.getRandomFromList(world.rand, Config.getRandomChests());
+        String chestplate = Tools.getRandomFromList(world.rand, ConfigSetup.getRandomChests());
         if (!"null".equals(chestplate)) {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(chestplate));
             if (item != null) {
                 entity.setItemStackToSlot(EntityEquipmentSlot.CHEST, new ItemStack(item));
             }
         }
-        String leggings = Tools.getRandomFromList(world.rand, Config.getRandomLeggings());
+        String leggings = Tools.getRandomFromList(world.rand, ConfigSetup.getRandomLeggings());
         if (!"null".equals(leggings)) {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(leggings));
             if (item != null) {
                 entity.setItemStackToSlot(EntityEquipmentSlot.LEGS, new ItemStack(item));
             }
         }
-        String boots = Tools.getRandomFromList(world.rand, Config.getRandomBoots());
+        String boots = Tools.getRandomFromList(world.rand, ConfigSetup.getRandomBoots());
         if (!"null".equals(boots)) {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(boots));
             if (item != null) {
@@ -287,12 +288,12 @@ public class ForgeEventHandlers {
                         // Should be in the cache, so we don't need a provider
                         LostChunkData data = LostSoulData.getSoulData(event.getEntity().world, dim, x, z, null);
                         data.newKill();
-                        if (Config.ANNOUNCE_CLEARED) {
+                        if (ConfigSetup.ANNOUNCE_CLEARED) {
                             if (data.getNumberKilled() == data.getTotalMobs()) {
-                                source.sendMessage(new TextComponentString(TextFormatting.GREEN + Config.MESSAGE_BUILDING_CLEARED));
-                                executeCommands((EntityPlayerMP) source, source.getEntityWorld(), Config.COMMAND_CLEARED);
+                                source.sendMessage(new TextComponentString(TextFormatting.GREEN + ConfigSetup.MESSAGE_BUILDING_CLEARED));
+                                executeCommands((EntityPlayerMP) source, source.getEntityWorld(), ConfigSetup.COMMAND_CLEARED);
                             } else if (data.getNumberKilled() == data.getTotalMobs() / 2) {
-                                source.sendMessage(new TextComponentString(TextFormatting.YELLOW + Config.MESSAGE_BUILDING_HALFWAY));
+                                source.sendMessage(new TextComponentString(TextFormatting.YELLOW + ConfigSetup.MESSAGE_BUILDING_HALFWAY));
                             }
                         }
                         LostSoulData.getData(event.getEntity().world).save(event.getEntity().world);

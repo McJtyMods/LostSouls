@@ -3,7 +3,7 @@ package mcjty.lostsouls.data;
 import mcjty.lostcities.api.ILostChunkGenerator;
 import mcjty.lostcities.api.ILostChunkInfo;
 import mcjty.lostcities.varia.ChunkCoord;
-import mcjty.lostsouls.config.Config;
+import mcjty.lostsouls.config.ConfigSetup;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -64,13 +64,13 @@ public class LostSoulData extends WorldSavedData {
         if (!lostChunkDataMap.containsKey(cc)) {
             LostChunkData data = new LostChunkData(cc);
             if (lost == null) {
-                data.initialize(cc, Config.HAUNTED_CHANCE, Config.MIN_MOBS, Config.MAX_MOBS);
+                data.initialize(cc, ConfigSetup.HAUNTED_CHANCE, ConfigSetup.MIN_MOBS, ConfigSetup.MAX_MOBS);
             } else {
                 ILostChunkInfo info = lost.getChunkInfo(cc.getChunkX(), cc.getChunkZ());
                 if (info.getSphere() != null) {
-                    data.initialize(cc, Config.SPHERE_HAUNTED_CHANCE, Config.SPHERE_MIN_MOBS, Config.SPHERE_MAX_MOBS);
+                    data.initialize(cc, ConfigSetup.SPHERE_HAUNTED_CHANCE, ConfigSetup.SPHERE_MIN_MOBS, ConfigSetup.SPHERE_MAX_MOBS);
                 } else {
-                    data.initialize(cc, Config.HAUNTED_CHANCE, Config.MIN_MOBS, Config.MAX_MOBS);
+                    data.initialize(cc, ConfigSetup.HAUNTED_CHANCE, ConfigSetup.MIN_MOBS, ConfigSetup.MAX_MOBS);
                 }
             }
             lostChunkDataMap.put(cc, data);
