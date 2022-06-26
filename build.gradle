@@ -1,46 +1,36 @@
+
+// For those who want the bleeding edge
 buildscript {
     repositories {
+        maven { url = 'https://maven.minecraftforge.net/' }
+        maven { url = 'https://maven.parchmentmc.org' }
+        maven { url 'https://plugins.gradle.org/m2/' }
         jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.parchmentmc:librarian:1.+'
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
     }
 }
 
-plugins {
-    id 'com.matthewprenger.cursegradle' version '1.1.0'
-}
-
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'maven'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+apply plugin: 'eclipse'
+apply plugin: 'com.matthewprenger.cursegradle'
+apply plugin: 'maven-publish'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 
 repositories {
-    maven { // The repo from which to get waila
-        name "Mobius Repo"
-        url "http://tehnut.info/maven"
-        //url "http://mobiusstrip.eu/maven"
-    }
     maven { // JEI
-        url "http://dvs1.progwml6.com/files/maven"
+        url "https://dvs1.progwml6.com/files/maven"
     }
-    maven {
-        name 'OC Repo'
-        url "http://maven.cil.li/"
-    }
-    maven { // TOP
-        name 'tterrag maven'
-        url "http://maven.tterrag.com/"
+    maven { // Patchouli
+        url "https://maven.blamejared.com"
     }
     maven { // McJtyLib
-        url "http://maven.k-4u.nl"
+        url "https://maven.k-4u.nl"
     }
     maven {
         name = "sonatype"
@@ -48,111 +38,86 @@ repositories {
     }
 }
 
-def ENV = System.getenv()
-if (ENV.DRONE_BUILD_NUMBER) {
-    version += ".n" + ENV.DRONE_BUILD_NUMBER
-}
 group= "com.github.mcjty" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "lostsouls"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += "-${System.getenv('BUILD_NUMBER')}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
 
 minecraft {
-    version = "1.12.1-14.22.0.2447"
-    runDir = "run"
-    mappings = "snapshot_20170810"
-    useDepAts = true
+    mappings channel: 'parchment', version: "2022.06.05-1.18.2"
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client = {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
+        }
+        server = {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
+        }
+        data = {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            workingDirectory project.file('run').canonicalPath
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'restrictions', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]
+            source sourceSets.main
+        }
+    }
 }
 
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'dev'
+jar {
+    manifest {
+        attributes 'FMLAT': 'accesstransformer.cfg',
+                "Specification-Title": "lostsouls",
+                "Specification-Vendor": "McJty",
+                "Specification-Version": "1",
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"McJty",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    }
 }
-
-artifacts {
-    archives sourceJar
-    archives deobfJar
-}
-
 
 dependencies {
-    deobfCompile "mezz.jei:jei_1.12:4.7.0.67"
-    deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.10-4"
-    deobfCompile "com.github.mcjty:intwheel:1.12-1.2.7"
-    deobfCompile "com.github.mcjty:lostcities:1.12-2.0.3"
-    //deobfCompile "mcp.mobius.waila:Hwyla:1.8.10-B23_1.11:api"
-    //deobfCompile "mcjty.theoneprobe:TheOneProbe:1.1x-1.4.7-57"
-    //deobfCompile "team.chisel:Chisel:MC1.11.2-0.0.10.14"
-    //deobfCompile "com.github.mcjty:compatlayer:1.11.2-0.2.6"
-    //deobfCompile "com.github.mcjty:intwheel:1.1x-1.2.6"
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    //compile "li.cil.oc:OpenComputers:MC1.7.10-1.5.+:api"
-}
+    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")
 
-processResources
-{
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+    if (findProject(':TheOneProbe') != null) {
+        implementation project(':TheOneProbe')
+    } else {
+        implementation fg.deobf(project.dependencies.create("mcjty.theoneprobe:theoneprobe:${top_version}") {
+            transitive = false
+        })
     }
-        
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
 
-task("uploadJars", dependsOn: "reobf") {
-    description = "uploads JARs"
-    if (System.getenv("local_maven") != null) {
-        apply plugin: 'maven'
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    repository(url: "file://" + System.getenv("local_maven"))
-                    pom {
-                        groupId = project.group
-                        version = project.version
-                        artifactId = project.archivesBaseName
-                        project {
-                            name project.archivesBaseName
-                            packaging 'jar'
-                            description 'LostCities'
-                            scm {
-                                url 'https://github.com/McJty/LostCities'
-                                connection 'scm:git:git@github.com:McJty/LostCities.git'
-                                developerConnection 'scm:git:git@github.com:McJty/LostCities.git'
-                            }
-                            issueManagement {
-                                system 'github'
-                                url 'https://github.com/McJty/McJtyLib/issues'
-                            }
-                            licenses {
-                                license {
-                                    name 'MIT'
-                                    distribution 'repo'
-                                }
-                            }
-                            developers {
-                                developer {
-                                    id 'McJty'
-                                    name 'McJty'
-                                    roles { role 'developer' }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    if (findProject(':LostCities') != null) {
+        implementation project(':LostCities')
+    } else {
+        implementation fg.deobf (project.dependencies.create("com.github.mcjty:lostcities:${lostcities_version}") {
+            transitive = false
+        })
     }
 }
 
@@ -199,12 +164,53 @@ curseforge {
         changelog = System.getenv('CHANGELOG') == null || System.getenv('CHANGELOG').equals('none') ? getChangelogText() : System.getenv('CHANGELOG')
         changelogType = 'html'
         releaseType = project.curse_type
-        addGameVersion '1.12.2'
+        addGameVersion project.minecraft_version
         mainArtifact(jar) {
             displayName = "${modname} - ${version}"
         }
-        relations {
-            requiredLibrary 'the-lost-cities'
+    }
+}
+
+publishing {
+    publications.create('mavenJava', MavenPublication) {
+        from components.java
+
+        artifactId = project.archivesBaseName
+        pom {
+            name = 'LostSouls'
+            description = 'Lost Souls'
+            scm {
+                url = 'https://github.com/McJtyMods/LostSouls'
+                connection = 'scm:git:git@github.com:McJtyMods/LostSouls.git'
+                developerConnection = 'scm:git:git@github.com:McJtyMods/LostSouls.git'
+            }
+            issueManagement {
+                system = 'github'
+                url = 'https://github.com/McJtyMods/LostSouls/issues'
+            }
+            licenses {
+                license {
+                    name = 'MIT'
+                    distribution = 'repo'
+                }
+            }
+            developers {
+                developer {
+                    id = 'McJty'
+                    name = 'McJty'
+                    roles = ['developer']
+                }
+            }
+        }
+    }
+    repositories {
+        if (System.getenv('local_maven') != null) {
+            maven {
+                name = 'local'
+                url = 'file://' + System.getenv('local_maven')
+            }
         }
     }
 }
+
+
