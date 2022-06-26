@@ -1,8 +1,6 @@
 package mcjty.lostsouls.config;
 
 import mcjty.lostsouls.LostSouls;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.common.FMLLog;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;

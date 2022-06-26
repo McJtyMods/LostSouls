@@ -1,0 +1,23 @@
+modLoader="javafml"
+license="MIT License https://github.com/McJtyMods/LostSouls/blob/1.18/LICENCE"
+loaderVersion="[31,)"
+issueTrackerURL="http://github.com/McJtyMods/LostSouls/issues"
+displayURL="http://github.com/McJtyMods/LostSouls/"
+#logoFile="examplemod.png" #optional
+#credits="Thanks for this example mod goes to Java" #optional
+authors="McJty"
+
+[[mods]]
+modId="lostsouls"
+version="${file.jarVersion}"
+displayName="LostSouls"
+#updateJSONURL="http://myurl.me/" #optional
+description='''
+Make Lost Cities a more dangerous place
+'''
+[[dependencies.lostsouls]]
+    modId="forge"
+    mandatory=true
+    versionRange="[31,)"
+    ordering="NONE"
+    side="BOTH"

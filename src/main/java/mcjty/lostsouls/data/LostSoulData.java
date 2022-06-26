@@ -1,35 +1,48 @@
 package mcjty.lostsouls.data;
 
-import mcjty.lostcities.api.ILostChunkGenerator;
 import mcjty.lostcities.api.ILostChunkInfo;
+import mcjty.lostcities.api.ILostCityInformation;
 import mcjty.lostcities.varia.ChunkCoord;
 import mcjty.lostsouls.config.ConfigSetup;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LostSoulData extends WorldSavedData {
+public class LostSoulData extends SavedData {
 
     public static final String NAME = "LostSoulData";
     private static LostSoulData instance = null;
 
     private final Map<ChunkCoord, LostChunkData> lostChunkDataMap = new HashMap<>();
 
-    public LostSoulData(String name) {
-        super(name);
+    @Nonnull
+    public static LostSoulData getData(Level world) {
+        if (world.isClientSide) {
+            throw new RuntimeException("Don't access this client-side!");
+        }
+        DimensionDataStorage storage = ((ServerLevel)world).getDataStorage();
+        return storage.computeIfAbsent(LostSoulData::new, LostSoulData::new, NAME);
     }
 
-    public void save(World world) {
-        world.setData(NAME, this);
-        markDirty();
+    public LostSoulData() {
     }
+
+    public LostSoulData(CompoundTag tag) {
+        load(tag);
+    }
+
 
     public static void clearInstance() {
         if (instance != null) {
@@ -39,55 +52,39 @@ public class LostSoulData extends WorldSavedData {
     }
 
     @Nonnull
-    public static LostSoulData getData(World world) {
-        if (world.isRemote) {
-            throw new RuntimeException("Don't access this client-side!");
-        }
-        if (instance != null) {
-            return instance;
-        }
-        instance = (LostSoulData) world.loadData(LostSoulData.class, NAME);
-        if (instance == null) {
-            instance = new LostSoulData(NAME);
-        }
-        return instance;
-    }
-
-    @Nonnull
-    public static LostChunkData getSoulData(World world, int dimension, int chunkX, int chunkZ, @Nullable ILostChunkGenerator lost) {
+    public static LostChunkData getSoulData(Level world, int chunkX, int chunkZ, @Nullable ILostCityInformation lost) {
         LostSoulData data = getData(world);
-        ChunkCoord cc = new ChunkCoord(dimension, chunkX, chunkZ);
-        return data.getSoulData(world, cc, lost);
+        ChunkCoord cc = new ChunkCoord(world.dimension(), chunkX, chunkZ);
+        return data.getSoulData((ServerLevel) world, cc, lost);
     }
 
-    private LostChunkData getSoulData(World world, ChunkCoord cc, @Nullable ILostChunkGenerator lost) {
+    private LostChunkData getSoulData(ServerLevel world, ChunkCoord cc, @Nullable ILostCityInformation lost) {
         if (!lostChunkDataMap.containsKey(cc)) {
             LostChunkData data = new LostChunkData(cc);
             if (lost == null) {
-                data.initialize(cc, ConfigSetup.HAUNTED_CHANCE, ConfigSetup.MIN_MOBS, ConfigSetup.MAX_MOBS);
+                data.initialize(world, cc, ConfigSetup.HAUNTED_CHANCE, ConfigSetup.MIN_MOBS, ConfigSetup.MAX_MOBS);
             } else {
-                ILostChunkInfo info = lost.getChunkInfo(cc.getChunkX(), cc.getChunkZ());
+                ILostChunkInfo info = lost.getChunkInfo(cc.chunkX(), cc.chunkZ());
                 if (info.getSphere() != null) {
-                    data.initialize(cc, ConfigSetup.SPHERE_HAUNTED_CHANCE, ConfigSetup.SPHERE_MIN_MOBS, ConfigSetup.SPHERE_MAX_MOBS);
+                    data.initialize(world, cc, ConfigSetup.SPHERE_HAUNTED_CHANCE, ConfigSetup.SPHERE_MIN_MOBS, ConfigSetup.SPHERE_MAX_MOBS);
                 } else {
-                    data.initialize(cc, ConfigSetup.HAUNTED_CHANCE, ConfigSetup.MIN_MOBS, ConfigSetup.MAX_MOBS);
+                    data.initialize(world, cc, ConfigSetup.HAUNTED_CHANCE, ConfigSetup.MIN_MOBS, ConfigSetup.MAX_MOBS);
                 }
             }
             lostChunkDataMap.put(cc, data);
-            save(world);
+            setDirty();
         }
         return lostChunkDataMap.get(cc);
     }
 
 
-    @Override
-    public void readFromNBT(NBTTagCompound nbt) {
-        NBTTagList list = nbt.getTagList("chunks", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0 ; i < list.tagCount() ; i++) {
-            NBTTagCompound tc = (NBTTagCompound) list.get(i);
-            int dim = tc.getInteger("dim");
-            int x = tc.getInteger("x");
-            int z = tc.getInteger("z");
+    private void load(CompoundTag nbt) {
+        ListTag list = nbt.getList("chunks", Tag.TAG_COMPOUND);
+        for (Tag tag : list) {
+            CompoundTag tc = (CompoundTag) tag;
+            ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(tc.getString("dim")));
+            int x = tc.getInt("x");
+            int z = tc.getInt("z");
             ChunkCoord cc = new ChunkCoord(dim, x, z);
             LostChunkData data = new LostChunkData(cc);
             data.readFromNBT(tc);
@@ -96,17 +93,17 @@ public class LostSoulData extends WorldSavedData {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        NBTTagList list = new NBTTagList();
+    public CompoundTag save(CompoundTag compound) {
+        ListTag list = new ListTag();
         for (Map.Entry<ChunkCoord, LostChunkData> entry : lostChunkDataMap.entrySet()) {
-            NBTTagCompound tc = new NBTTagCompound();
-            tc.setInteger("dim", entry.getKey().getDimension());
-            tc.setInteger("x", entry.getKey().getChunkX());
-            tc.setInteger("z", entry.getKey().getChunkZ());
+            CompoundTag tc = new CompoundTag();
+            tc.putString("dim", entry.getKey().dimension().location().toString());
+            tc.putInt("x", entry.getKey().chunkX());
+            tc.putInt("z", entry.getKey().chunkZ());
             entry.getValue().writeToNBT(tc);
-            list.appendTag(tc);
+            list.add(tc);
         }
-        compound.setTag("chunks", list);
+        compound.put("chunks", list);
         return compound;
     }
 }

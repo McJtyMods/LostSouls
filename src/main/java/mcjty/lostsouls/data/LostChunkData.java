@@ -1,7 +1,8 @@
 package mcjty.lostsouls.data;
 
 import mcjty.lostcities.varia.ChunkCoord;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.Random;
 
@@ -17,8 +18,8 @@ public class LostChunkData {
         enteredCount = 0;
     }
 
-    public void initialize(ChunkCoord cc, float hauntedChance, int minMobs, int maxMobs) {
-        Random random = new Random(cc.getDimension()*899812591L + cc.getChunkX()*916023653L + cc.getChunkZ()*797003437L);
+    public void initialize(ServerLevel level, ChunkCoord cc, float hauntedChance, int minMobs, int maxMobs) {
+        Random random = new Random(level.getSeed()*899812591L + cc.chunkX()*916023653L + cc.chunkZ()*797003437L);
         random.nextFloat();
         random.nextFloat();
         haunted = random.nextFloat() < hauntedChance;
@@ -53,17 +54,17 @@ public class LostChunkData {
         enteredCount++;
     }
 
-    public void readFromNBT(NBTTagCompound nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         haunted = nbt.getBoolean("haunted");
-        totalMobs = nbt.getInteger("max");
-        numberKilled = nbt.getInteger("killed");
-        enteredCount = nbt.getInteger("enteredCount");
+        totalMobs = nbt.getInt("max");
+        numberKilled = nbt.getInt("killed");
+        enteredCount = nbt.getInt("enteredCount");
     }
 
-    public void writeToNBT(NBTTagCompound compound) {
-        compound.setBoolean("haunted", haunted);
-        compound.setInteger("max", totalMobs);
-        compound.setInteger("killed", numberKilled);
-        compound.setInteger("enteredCount", enteredCount);
+    public void writeToNBT(CompoundTag compound) {
+        compound.putBoolean("haunted", haunted);
+        compound.putInt("max", totalMobs);
+        compound.putInt("killed", numberKilled);
+        compound.putInt("enteredCount", enteredCount);
     }
 }
