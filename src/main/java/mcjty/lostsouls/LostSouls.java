@@ -1,5 +1,6 @@
 package mcjty.lostsouls;
 
+import mcjty.lostsouls.config.Config;
 import mcjty.lostsouls.setup.ModSetup;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -17,6 +18,7 @@ public class LostSouls {
 
     public LostSouls() {
         instance = this;
+        Config.register();
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(setup::init);
 
