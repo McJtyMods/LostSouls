@@ -1,23 +1,35 @@
-package mcjty.lostsouls.config;
+package mcjty.lostsouls.setup;
 
 import com.google.common.collect.Lists;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Config {
 
     public static final String CATEGORY_GENERAL = "general";
 
-    public static String[] COMMAND_FIRSTTIME = new String[]{};
-    public static String[] COMMAND_ENTERED = new String[]{};
-    public static String[] COMMAND_CLEARED = new String[]{};
-    public static String MESSAGE_UNSAFE_BUILDING = "The building isn't safe enough!";
-    public static String MESSAGE_BUILDING_HAUNTED = "This building is haunted. Be careful!";
-    public static String MESSAGE_BUILDING_CLEARED = "The building feels a lot safer now!";
-    public static String MESSAGE_BUILDING_HALFWAY = "About half way there! Keep going!";
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_FIRSTTIME;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_ENTERED;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_CLEARED;
+
+    private static String[] DEF_COMMAND_FIRSTTIME = new String[]{};
+    private static String[] DEF_COMMAND_ENTERED = new String[]{};
+    private static String[] DEF_COMMAND_CLEARED = new String[]{};
+
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
+    private static String DEF_MESSAGE_UNSAFE_BUILDING = "The building isn't safe enough!";
+    private static String DEF_MESSAGE_BUILDING_HAUNTED = "This building is haunted. Be careful!";
+    private static String DEF_MESSAGE_BUILDING_CLEARED = "The building feels a lot safer now!";
+    private static String DEF_MESSAGE_BUILDING_HALFWAY = "About half way there! Keep going!";
 
     public static ForgeConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
     public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
@@ -100,27 +112,89 @@ public class Config {
                 .comment("List of effects that a mob can have. Note that multiple effects are possible")
                 .defineList("randomEffects", Lists.newArrayList(DEF_RANDOM_EFFECTS), s -> s instanceof String);
 
-        SERVERTICK_TIMEOUT = cfg.getInt("serverTickTimeout", CATEGORY_GENERAL, SERVERTICK_TIMEOUT, 1, 1000000, "The amount of ticks that the server waits before checking for new spawns");
-        SPAWN_MAX_NEARBY = cfg.getInt("spawnMaxNearby", CATEGORY_GENERAL, SPAWN_MAX_NEARBY, 1, 200, "The maximum amount of entities that can spawn near each other (of the same type)");
-        MIN_SPAWN_DISTANCE = cfg.getFloat("minSpawnDistance", CATEGORY_GENERAL, MIN_SPAWN_DISTANCE, 0, 16, "The minimum distance between the player and newly spawned mobs");
-        MIN_HEALTH_BONUS = cfg.getFloat("minHealthBonus", CATEGORY_GENERAL, MIN_HEALTH_BONUS, 0.01f, 10000, "The minimum health bonus that the mob will get");
-        MAX_HEALTH_BONUS = cfg.getFloat("maxHealthBonus", CATEGORY_GENERAL, MAX_HEALTH_BONUS, 0.01f, 10000, "The maximum health bonus that the mob will get");
-        MIN_DAMAGE_BONUS = cfg.getFloat("minDamageBonus", CATEGORY_GENERAL, MIN_DAMAGE_BONUS, 0.01f, 10000, "The minimum damage bonus that the mob will get");
-        MAX_DAMAGE_BONUS = cfg.getFloat("maxDamageBonus", CATEGORY_GENERAL, MAX_DAMAGE_BONUS, 0.01f, 10000, "The maximum damage bonus that the mob will get");
+        COMMAND_FIRSTTIME = COMMON_BUILDER
+                .comment("List of console commands to execute the first time a building is entered")
+                .defineList("commandFirstTime", Lists.newArrayList(DEF_COMMAND_FIRSTTIME), s -> s instanceof String);
+        COMMAND_ENTERED = COMMON_BUILDER
+                .comment("List of console commands to execute every time a building is entered")
+                .defineList("commandEntered", Lists.newArrayList(DEF_COMMAND_ENTERED), s -> s instanceof String);
+        COMMAND_CLEARED = COMMON_BUILDER
+                .comment("List of console commands to execute when a building is cleared")
+                .defineList("commandCleared", Lists.newArrayList(DEF_COMMAND_CLEARED), s -> s instanceof String);
 
-        HAUNTED_CHANCE = cfg.getFloat("hauntedChance", CATEGORY_GENERAL, HAUNTED_CHANCE, 0, 1, "The chance that a building is haunted");
-        MIN_MOBS = cfg.getInt("minMobs", CATEGORY_GENERAL, MIN_MOBS, 1, 10000, "The minimum amount of mobs that are spawned by a haunted building");
-        MAX_MOBS = cfg.getInt("maxMobs", CATEGORY_GENERAL, MAX_MOBS, 1, 10000, "The maximum amount of mobs that are spawned by a haunted building");
-        SPHERE_HAUNTED_CHANCE = cfg.getFloat("sphereHauntedChance", CATEGORY_GENERAL, SPHERE_HAUNTED_CHANCE, 0, 1, "The chance that a building is haunted. This version is used in case the building is in a Lost City sphere");
-        SPHERE_MIN_MOBS = cfg.getInt("sphereMinMobs", CATEGORY_GENERAL, SPHERE_MIN_MOBS, 1, 10000, "The minimum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere");
-        SPHERE_MAX_MOBS = cfg.getInt("sphereMaxMobs", CATEGORY_GENERAL, SPHERE_MAX_MOBS, 1, 10000, "The maximum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere");
+        MESSAGE_UNSAFE_BUILDING = COMMON_BUILDER
+                .comment("This message is given when the player tries to open a chest in a haunted building")
+                .define("messageUnsafeBuilding", DEF_MESSAGE_UNSAFE_BUILDING);
+        MESSAGE_BUILDING_HAUNTED = COMMON_BUILDER
+                .comment("This message is given when the player enters a haunted building for the first time")
+                .define("messageBuildingHaunted", DEF_MESSAGE_BUILDING_HAUNTED);
+        MESSAGE_BUILDING_CLEARED = COMMON_BUILDER
+                .comment("This message is given when the player clears a building")
+                .define("messageBuildingCleared", DEF_MESSAGE_BUILDING_CLEARED);
+        MESSAGE_BUILDING_HALFWAY = COMMON_BUILDER
+                .comment("This message is given when the player is halfway clearing a building")
+                .define("messageBuildingHalfway", DEF_MESSAGE_BUILDING_HALFWAY);
 
-        CHECK_VALID_SPAWN = cfg.getBoolean("checkValidSpawn", CATEGORY_GENERAL, CHECK_VALID_SPAWN, "If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level");
-        ANNOUNCE_CLEARED = cfg.getBoolean("announceCleared", CATEGORY_GENERAL, ANNOUNCE_CLEARED, "If this is true then the player will be notified when a building is cleared");
-        ANNOUNCE_ENTER = cfg.getBoolean("announceEnter", CATEGORY_GENERAL, ANNOUNCE_ENTER, "If this is true then the player will be notified when he or she enters a haunted building");
-        ANNOUNCE_CHESTLOCKED = cfg.getBoolean("announceChestLocked", CATEGORY_GENERAL, ANNOUNCE_CHESTLOCKED, "If this is true then the player will get a message when he/she tries to open a locked chest");
-        LOCK_CHESTS_UNTIL_CLEARED = cfg.getBoolean("lockChestsUntilCleared", CATEGORY_GENERAL, LOCK_CHESTS_UNTIL_CLEARED, "If this is true then all chests will be locked until the building is cleared");
-        LOCK_ONLY_CHESTS = cfg.getBoolean("lockOnlyChests", CATEGORY_GENERAL, LOCK_ONLY_CHESTS, "This option is only useful when 'lockChestsUntilCleared'. If true only vanilla chests will be locked. Otherwise all tile entities are locked");
+
+        SERVERTICK_TIMEOUT = COMMON_BUILDER
+                .comment("The amount of ticks that the server waits before checking for new spawns")
+                .defineInRange("serverTickTimeout", 200, 1, 1000000);
+        SPAWN_MAX_NEARBY = COMMON_BUILDER
+                .comment("The maximum amount of entities that can spawn near each other (of the same type)")
+                .defineInRange("spawnMaxNearby", 6, 1, 200);
+        MIN_SPAWN_DISTANCE = COMMON_BUILDER
+                .comment("The minimum distance between the player and newly spawned mobs")
+                .defineInRange("minSpawnDistance", 8.0f, 0, 16);
+        MIN_HEALTH_BONUS = COMMON_BUILDER
+                .comment("The minimum health bonus that the mob will get")
+                .defineInRange("minHealthBonus", 2f, 0.01f, 10000);
+        MAX_HEALTH_BONUS = COMMON_BUILDER
+                .comment("The maximum health bonus that the mob will get")
+                .defineInRange("maxHealthBonus", 5f, 0.01f, 10000);
+        MIN_DAMAGE_BONUS = COMMON_BUILDER
+                .comment("The minimum damage bonus that the mob will get")
+                .defineInRange("minDamageBonus", 2f, 0.01f, 10000);
+        MAX_DAMAGE_BONUS = COMMON_BUILDER
+                .comment("The maximum damage bonus that the mob will get")
+                .defineInRange("maxDamageBonus", 5f, 0.01f, 10000);
+
+        HAUNTED_CHANCE = COMMON_BUILDER
+                .comment("The chance that a building is haunted")
+                .defineInRange("hauntedChance", 0.8f, 0, 1);
+        MIN_MOBS = COMMON_BUILDER
+                .comment("The minimum amount of mobs that are spawned by a haunted building")
+                .defineInRange("minMobs", 10, 1, 10000);
+        MAX_MOBS = COMMON_BUILDER
+                .comment("The maximum amount of mobs that are spawned by a haunted building")
+                .defineInRange("maxMobs", 50, 1, 10000);
+        SPHERE_HAUNTED_CHANCE = COMMON_BUILDER
+                .comment("The chance that a building is haunted. This version is used in case the building is in a Lost City sphere")
+                .defineInRange("sphereHauntedChance", 0.8f, 0, 1);
+        SPHERE_MIN_MOBS = COMMON_BUILDER
+                .comment("The minimum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere")
+                .defineInRange("sphereMinMobs", 10, 1, 10000);
+        SPHERE_MAX_MOBS = COMMON_BUILDER
+                .comment("The maximum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere")
+                .defineInRange("sphereMaxMobs", 50, 1, 10000);
+
+        CHECK_VALID_SPAWN = COMMON_BUILDER
+                .comment("If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level")
+                .define("checkValidSpawn", false);
+        ANNOUNCE_CLEARED = COMMON_BUILDER
+                .comment("If this is true then the player will be notified when a building is cleared")
+                .define("announceCleared", true);
+        ANNOUNCE_ENTER = COMMON_BUILDER
+                .comment("If this is true then the player will be notified when he or she enters a haunted building")
+                .define("announceEnter", true);
+        ANNOUNCE_CHESTLOCKED = COMMON_BUILDER
+                .comment("If this is true then the player will get a message when he/she tries to open a locked chest")
+                .define("announceChestLocked", true);
+        LOCK_CHESTS_UNTIL_CLEARED = COMMON_BUILDER
+                .comment("If this is true then all chests will be locked until the building is cleared")
+                .define("lockChestsUntilCleared", true);
+        LOCK_ONLY_CHESTS = COMMON_BUILDER
+                .comment("This option is only useful when 'lockChestsUntilCleared'. If true only vanilla chests will be locked. Otherwise all tile entities are locked")
+                .define("lockOnlyChests", true);
 
         SERVER_BUILDER.pop();
         COMMON_BUILDER.pop();

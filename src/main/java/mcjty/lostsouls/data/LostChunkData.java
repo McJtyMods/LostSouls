@@ -18,7 +18,7 @@ public class LostChunkData {
         enteredCount = 0;
     }
 
-    public void initialize(ServerLevel level, ChunkCoord cc, float hauntedChance, int minMobs, int maxMobs) {
+    public void initialize(ServerLevel level, ChunkCoord cc, double hauntedChance, int minMobs, int maxMobs) {
         Random random = new Random(level.getSeed()*899812591L + cc.chunkX()*916023653L + cc.chunkZ()*797003437L);
         random.nextFloat();
         random.nextFloat();

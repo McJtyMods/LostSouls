@@ -3,7 +3,7 @@ package mcjty.lostsouls.data;
 import mcjty.lostcities.api.ILostChunkInfo;
 import mcjty.lostcities.api.ILostCityInformation;
 import mcjty.lostcities.varia.ChunkCoord;
-import mcjty.lostsouls.config.Config;
+import mcjty.lostsouls.setup.Config;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,7 +23,6 @@ import java.util.Map;
 public class LostSoulData extends SavedData {
 
     public static final String NAME = "LostSoulData";
-    private static LostSoulData instance = null;
 
     private final Map<ChunkCoord, LostChunkData> lostChunkDataMap = new HashMap<>();
 
@@ -44,13 +43,6 @@ public class LostSoulData extends SavedData {
     }
 
 
-    public static void clearInstance() {
-        if (instance != null) {
-            instance.lostChunkDataMap.clear();
-            instance = null;
-        }
-    }
-
     @Nonnull
     public static LostChunkData getSoulData(Level world, int chunkX, int chunkZ, @Nullable ILostCityInformation lost) {
         LostSoulData data = getData(world);
@@ -62,13 +54,13 @@ public class LostSoulData extends SavedData {
         if (!lostChunkDataMap.containsKey(cc)) {
             LostChunkData data = new LostChunkData(cc);
             if (lost == null) {
-                data.initialize(world, cc, Config.HAUNTED_CHANCE, Config.MIN_MOBS, Config.MAX_MOBS);
+                data.initialize(world, cc, Config.HAUNTED_CHANCE.get(), Config.MIN_MOBS.get(), Config.MAX_MOBS.get());
             } else {
                 ILostChunkInfo info = lost.getChunkInfo(cc.chunkX(), cc.chunkZ());
                 if (info.getSphere() != null) {
-                    data.initialize(world, cc, Config.SPHERE_HAUNTED_CHANCE, Config.SPHERE_MIN_MOBS, Config.SPHERE_MAX_MOBS);
+                    data.initialize(world, cc, Config.SPHERE_HAUNTED_CHANCE.get(), Config.SPHERE_MIN_MOBS.get(), Config.SPHERE_MAX_MOBS.get());
                 } else {
-                    data.initialize(world, cc, Config.HAUNTED_CHANCE, Config.MIN_MOBS, Config.MAX_MOBS);
+                    data.initialize(world, cc, Config.HAUNTED_CHANCE.get(), Config.MIN_MOBS.get(), Config.MAX_MOBS.get());
                 }
             }
             lostChunkDataMap.put(cc, data);
