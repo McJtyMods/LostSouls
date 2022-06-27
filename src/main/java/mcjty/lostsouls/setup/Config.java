@@ -78,135 +78,124 @@ public class Config {
     private static List<Pair<Float, String>> randomBoots = null;
     private static List<Pair<Float, String>> randomEffects = null;
 
-    private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
-    private static final ForgeConfigSpec.Builder CLIENT_BUILDER = new ForgeConfigSpec.Builder();
     private static final ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
 
     public static void register() {
-        COMMON_BUILDER.comment("General settings").push(CATEGORY_GENERAL);
-        CLIENT_BUILDER.comment("General settings").push(CATEGORY_GENERAL);
         SERVER_BUILDER.comment("General settings").push(CATEGORY_GENERAL);
 
-        EXCLUDED_BUILDINGS = COMMON_BUILDER
+        EXCLUDED_BUILDINGS = SERVER_BUILDER
                 .comment("A list of buildings that are safe(r)")
                 .defineList("excludedBuildings", Lists.newArrayList(Config.DEF_EXCLUDED_BUILDINGS), s -> s instanceof String);
-        MOBS = COMMON_BUILDER
+        MOBS = SERVER_BUILDER
                 .comment("List of mobs that can spawn in buildings together with their rarity")
                 .defineList("mobs", Lists.newArrayList(DEF_MOBS), s -> s instanceof String);
-        RANDOM_WEAPONS = COMMON_BUILDER
+        RANDOM_WEAPONS = SERVER_BUILDER
                 .comment("List of weapons that the mobs can have together with their rarity")
                 .defineList("randomWeapons", Lists.newArrayList(DEF_RANDOM_WEAPONS), s -> s instanceof String);
-        RANDOM_HELMETS = COMMON_BUILDER
+        RANDOM_HELMETS = SERVER_BUILDER
                 .comment("List of helmets that the mobs can have together with their rarity")
                 .defineList("randomHelmets", Lists.newArrayList(DEF_RANDOM_HELMETS), s -> s instanceof String);
-        RANDOM_CHESTS = COMMON_BUILDER
+        RANDOM_CHESTS = SERVER_BUILDER
                 .comment("List of chestplates that the mobs can have together with their rarity")
                 .defineList("randomChestplates", Lists.newArrayList(DEF_RANDOM_CHESTS), s -> s instanceof String);
-        RANDOM_LEGGINGS = COMMON_BUILDER
+        RANDOM_LEGGINGS = SERVER_BUILDER
                 .comment("List of leggings that the mobs can have together with their rarity")
                 .defineList("randomLeggings", Lists.newArrayList(DEF_RANDOM_LEGGINGS), s -> s instanceof String);
-        RANDOM_BOOTS = COMMON_BUILDER
+        RANDOM_BOOTS = SERVER_BUILDER
                 .comment("List of boots that the mobs can have together with their rarity")
                 .defineList("randomBoots", Lists.newArrayList(DEF_RANDOM_BOOTS), s -> s instanceof String);
-        RANDOM_EFFECTS = COMMON_BUILDER
+        RANDOM_EFFECTS = SERVER_BUILDER
                 .comment("List of effects that a mob can have. Note that multiple effects are possible")
                 .defineList("randomEffects", Lists.newArrayList(DEF_RANDOM_EFFECTS), s -> s instanceof String);
 
-        COMMAND_FIRSTTIME = COMMON_BUILDER
+        COMMAND_FIRSTTIME = SERVER_BUILDER
                 .comment("List of console commands to execute the first time a building is entered")
                 .defineList("commandFirstTime", Lists.newArrayList(DEF_COMMAND_FIRSTTIME), s -> s instanceof String);
-        COMMAND_ENTERED = COMMON_BUILDER
+        COMMAND_ENTERED = SERVER_BUILDER
                 .comment("List of console commands to execute every time a building is entered")
                 .defineList("commandEntered", Lists.newArrayList(DEF_COMMAND_ENTERED), s -> s instanceof String);
-        COMMAND_CLEARED = COMMON_BUILDER
+        COMMAND_CLEARED = SERVER_BUILDER
                 .comment("List of console commands to execute when a building is cleared")
                 .defineList("commandCleared", Lists.newArrayList(DEF_COMMAND_CLEARED), s -> s instanceof String);
 
-        MESSAGE_UNSAFE_BUILDING = COMMON_BUILDER
+        MESSAGE_UNSAFE_BUILDING = SERVER_BUILDER
                 .comment("This message is given when the player tries to open a chest in a haunted building")
                 .define("messageUnsafeBuilding", DEF_MESSAGE_UNSAFE_BUILDING);
-        MESSAGE_BUILDING_HAUNTED = COMMON_BUILDER
+        MESSAGE_BUILDING_HAUNTED = SERVER_BUILDER
                 .comment("This message is given when the player enters a haunted building for the first time")
                 .define("messageBuildingHaunted", DEF_MESSAGE_BUILDING_HAUNTED);
-        MESSAGE_BUILDING_CLEARED = COMMON_BUILDER
+        MESSAGE_BUILDING_CLEARED = SERVER_BUILDER
                 .comment("This message is given when the player clears a building")
                 .define("messageBuildingCleared", DEF_MESSAGE_BUILDING_CLEARED);
-        MESSAGE_BUILDING_HALFWAY = COMMON_BUILDER
+        MESSAGE_BUILDING_HALFWAY = SERVER_BUILDER
                 .comment("This message is given when the player is halfway clearing a building")
                 .define("messageBuildingHalfway", DEF_MESSAGE_BUILDING_HALFWAY);
 
 
-        SERVERTICK_TIMEOUT = COMMON_BUILDER
+        SERVERTICK_TIMEOUT = SERVER_BUILDER
                 .comment("The amount of ticks that the server waits before checking for new spawns")
                 .defineInRange("serverTickTimeout", 200, 1, 1000000);
-        SPAWN_MAX_NEARBY = COMMON_BUILDER
+        SPAWN_MAX_NEARBY = SERVER_BUILDER
                 .comment("The maximum amount of entities that can spawn near each other (of the same type)")
                 .defineInRange("spawnMaxNearby", 6, 1, 200);
-        MIN_SPAWN_DISTANCE = COMMON_BUILDER
+        MIN_SPAWN_DISTANCE = SERVER_BUILDER
                 .comment("The minimum distance between the player and newly spawned mobs")
                 .defineInRange("minSpawnDistance", 8.0f, 0, 16);
-        MIN_HEALTH_BONUS = COMMON_BUILDER
+        MIN_HEALTH_BONUS = SERVER_BUILDER
                 .comment("The minimum health bonus that the mob will get")
                 .defineInRange("minHealthBonus", 2f, 0.01f, 10000);
-        MAX_HEALTH_BONUS = COMMON_BUILDER
+        MAX_HEALTH_BONUS = SERVER_BUILDER
                 .comment("The maximum health bonus that the mob will get")
                 .defineInRange("maxHealthBonus", 5f, 0.01f, 10000);
-        MIN_DAMAGE_BONUS = COMMON_BUILDER
+        MIN_DAMAGE_BONUS = SERVER_BUILDER
                 .comment("The minimum damage bonus that the mob will get")
                 .defineInRange("minDamageBonus", 2f, 0.01f, 10000);
-        MAX_DAMAGE_BONUS = COMMON_BUILDER
+        MAX_DAMAGE_BONUS = SERVER_BUILDER
                 .comment("The maximum damage bonus that the mob will get")
                 .defineInRange("maxDamageBonus", 5f, 0.01f, 10000);
 
-        HAUNTED_CHANCE = COMMON_BUILDER
+        HAUNTED_CHANCE = SERVER_BUILDER
                 .comment("The chance that a building is haunted")
                 .defineInRange("hauntedChance", 0.8f, 0, 1);
-        MIN_MOBS = COMMON_BUILDER
+        MIN_MOBS = SERVER_BUILDER
                 .comment("The minimum amount of mobs that are spawned by a haunted building")
                 .defineInRange("minMobs", 10, 1, 10000);
-        MAX_MOBS = COMMON_BUILDER
+        MAX_MOBS = SERVER_BUILDER
                 .comment("The maximum amount of mobs that are spawned by a haunted building")
                 .defineInRange("maxMobs", 50, 1, 10000);
-        SPHERE_HAUNTED_CHANCE = COMMON_BUILDER
+        SPHERE_HAUNTED_CHANCE = SERVER_BUILDER
                 .comment("The chance that a building is haunted. This version is used in case the building is in a Lost City sphere")
                 .defineInRange("sphereHauntedChance", 0.8f, 0, 1);
-        SPHERE_MIN_MOBS = COMMON_BUILDER
+        SPHERE_MIN_MOBS = SERVER_BUILDER
                 .comment("The minimum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere")
                 .defineInRange("sphereMinMobs", 10, 1, 10000);
-        SPHERE_MAX_MOBS = COMMON_BUILDER
+        SPHERE_MAX_MOBS = SERVER_BUILDER
                 .comment("The maximum amount of mobs that are spawned by a haunted building. This version is used in case the building is in a Lost City sphere")
                 .defineInRange("sphereMaxMobs", 50, 1, 10000);
 
-        CHECK_VALID_SPAWN = COMMON_BUILDER
+        CHECK_VALID_SPAWN = SERVER_BUILDER
                 .comment("If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level")
                 .define("checkValidSpawn", false);
-        ANNOUNCE_CLEARED = COMMON_BUILDER
+        ANNOUNCE_CLEARED = SERVER_BUILDER
                 .comment("If this is true then the player will be notified when a building is cleared")
                 .define("announceCleared", true);
-        ANNOUNCE_ENTER = COMMON_BUILDER
+        ANNOUNCE_ENTER = SERVER_BUILDER
                 .comment("If this is true then the player will be notified when he or she enters a haunted building")
                 .define("announceEnter", true);
-        ANNOUNCE_CHESTLOCKED = COMMON_BUILDER
+        ANNOUNCE_CHESTLOCKED = SERVER_BUILDER
                 .comment("If this is true then the player will get a message when he/she tries to open a locked chest")
                 .define("announceChestLocked", true);
-        LOCK_CHESTS_UNTIL_CLEARED = COMMON_BUILDER
+        LOCK_CHESTS_UNTIL_CLEARED = SERVER_BUILDER
                 .comment("If this is true then all chests will be locked until the building is cleared")
                 .define("lockChestsUntilCleared", true);
-        LOCK_ONLY_CHESTS = COMMON_BUILDER
+        LOCK_ONLY_CHESTS = SERVER_BUILDER
                 .comment("This option is only useful when 'lockChestsUntilCleared'. If true only vanilla chests will be locked. Otherwise all tile entities are locked")
                 .define("lockOnlyChests", true);
 
         SERVER_BUILDER.pop();
-        COMMON_BUILDER.pop();
-        CLIENT_BUILDER.pop();
-
-        COMMON_CONFIG = COMMON_BUILDER.build();
-        CLIENT_CONFIG = CLIENT_BUILDER.build();
         SERVER_CONFIG = SERVER_BUILDER.build();
     }
 
-    public static ForgeConfigSpec COMMON_CONFIG;
-    public static ForgeConfigSpec CLIENT_CONFIG;
     public static ForgeConfigSpec SERVER_CONFIG;
 
     public static Set<String> getExcludedBuildings() {
