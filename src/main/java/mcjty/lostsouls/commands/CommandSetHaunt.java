@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import mcjty.lostcities.commands.CommandCreateBuilding;
 import mcjty.lostsouls.data.LostChunkData;
 import mcjty.lostsouls.data.LostSoulData;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class CommandSetHaunt implements Command<CommandSourceStack> {
 
-    private static final CommandCreateBuilding CMD = new CommandCreateBuilding();
+    private static final CommandSetHaunt CMD = new CommandSetHaunt();
 
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandDispatcher<CommandSourceStack> dispatcher) {
         return Commands.literal("sethaunt")
