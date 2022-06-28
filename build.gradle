@@ -171,6 +171,10 @@ curseforge {
     }
 }
 
+jar {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 publishing {
     publications.create('mavenJava', MavenPublication) {
         from components.java

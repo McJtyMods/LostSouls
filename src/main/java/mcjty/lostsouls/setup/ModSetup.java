@@ -15,7 +15,7 @@ public class ModSetup {
 
     public void init(FMLCommonSetupEvent e) {
         MinecraftForge.EVENT_BUS.register(new ForgeEventHandlers());
-        InterModComms.sendTo("lostcities", "getLostCities", ModSetup.GetLostCities::new);
+        InterModComms.sendTo(ILostCities.LOSTCITIES, ILostCities.GET_LOST_CITIES, ModSetup.GetLostCities::new);
     }
 
 
