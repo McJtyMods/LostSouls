@@ -26,10 +26,10 @@ public class Config {
     public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
     public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
     public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
-    private static String DEF_MESSAGE_UNSAFE_BUILDING = "The building isn't safe enough!";
-    private static String DEF_MESSAGE_BUILDING_HAUNTED = "This building is haunted. Be careful!";
-    private static String DEF_MESSAGE_BUILDING_CLEARED = "The building feels a lot safer now!";
-    private static String DEF_MESSAGE_BUILDING_HALFWAY = "About half way there! Keep going!";
+    private final static String DEF_MESSAGE_UNSAFE_BUILDING = "The building isn't safe enough!";
+    private final static String DEF_MESSAGE_BUILDING_HAUNTED = "This building is haunted. Be careful!";
+    private final static String DEF_MESSAGE_BUILDING_CLEARED = "The building feels a lot safer now!";
+    private final static String DEF_MESSAGE_BUILDING_HALFWAY = "About half way there! Keep going!";
 
     public static ForgeConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
     public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
