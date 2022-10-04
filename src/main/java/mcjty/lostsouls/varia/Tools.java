@@ -1,5 +1,6 @@
 package mcjty.lostsouls.varia;
 
+import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.Random;
 
 public class Tools {
 
-    public static String getRandomFromList(Random random, List<Pair<Float, String>> list) {
+    public static String getRandomFromList(RandomSource random, List<Pair<Float, String>> list) {
         if (list.isEmpty()) {
             return null;
         }

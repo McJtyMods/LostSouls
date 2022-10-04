@@ -10,12 +10,12 @@ import mcjty.lostsouls.setup.ModSetup;
 import mcjty.lostsouls.varia.ChunkCoord;
 import mcjty.lostsouls.varia.Tools;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -38,7 +38,10 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ForgeEventHandlers {
 
@@ -54,7 +57,7 @@ public class ForgeEventHandlers {
 
     @SubscribeEvent
     public void onPlayerInteract(PlayerInteractEvent event) {
-        Level world = event.getWorld();
+        Level world = event.getLevel();
         if (Config.LOCK_CHESTS_UNTIL_CLEARED.get() && !world.isClientSide) {
             ILostCityInformation info = ModSetup.lostCities.getLostInfo(world);
             if (info != null) {
@@ -69,7 +72,7 @@ public class ForgeEventHandlers {
                     if (isHaunted(data, buildingType)) {
                         event.setCanceled(true);
                         if (Config.ANNOUNCE_CHESTLOCKED.get()) {
-                            event.getPlayer().sendMessage(new TextComponent(ChatFormatting.YELLOW + Config.MESSAGE_UNSAFE_BUILDING.get()), Util.NIL_UUID);
+                            event.getEntity().sendSystemMessage(Component.literal(ChatFormatting.YELLOW + Config.MESSAGE_UNSAFE_BUILDING.get()));
                         }
                     }
                 }
@@ -134,7 +137,7 @@ public class ForgeEventHandlers {
         if (buildingType != null) {
             // We have a building
             Level world = player.getLevel();
-            Random rand = world.getRandom();
+            RandomSource rand = world.getRandom();
             LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, lost);
             if (isHaunted(data, buildingType)) {
                 if (entered) {
@@ -143,7 +146,7 @@ public class ForgeEventHandlers {
                     int enteredCount = data.getEnteredCount();
                     if (enteredCount == 1 && Config.ANNOUNCE_ENTER.get()) {
                         // First time
-                        player.sendMessage(new TextComponent(ChatFormatting.YELLOW + Config.MESSAGE_BUILDING_HAUNTED.get()), Util.NIL_UUID);
+                        player.sendSystemMessage(Component.literal(ChatFormatting.YELLOW + Config.MESSAGE_BUILDING_HAUNTED.get()));
                     }
                     if (enteredCount == 1) {
                         executeCommands(player, world, Config.COMMAND_FIRSTTIME.get());
@@ -176,7 +179,7 @@ public class ForgeEventHandlers {
                         double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
                         if (distance >= Config.MIN_SPAWN_DISTANCE.get()) {
                             String mob = Tools.getRandomFromList(rand, Config.getRandomMobs());
-                            EntityType<?> type = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(mob));
+                            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(mob));
                             if (type == null) {
                                 throw new RuntimeException("Unknown entity '" + mob + "'!");
                             }
@@ -219,7 +222,7 @@ public class ForgeEventHandlers {
 
     private void boostEntity(Level world, LivingEntity entity) {
         AttributeInstance entityAttribute = entity.getAttribute(Attributes.MAX_HEALTH);
-        Random rand = world.getRandom();
+        RandomSource rand = world.getRandom();
         if (entityAttribute != null) {
             double f = rand.nextFloat() * (Config.MAX_HEALTH_BONUS.get() - Config.MIN_HEALTH_BONUS.get()) + Config.MIN_HEALTH_BONUS.get();
             double newMax = entityAttribute.getBaseValue() * f;
@@ -299,10 +302,10 @@ public class ForgeEventHandlers {
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED.get()) {
                             if (data.getNumberKilled() == data.getTotalMobs()) {
-                                source.sendMessage(new TextComponent(ChatFormatting.GREEN + Config.MESSAGE_BUILDING_CLEARED.get()), Util.NIL_UUID);
+                                source.sendSystemMessage(Component.literal(ChatFormatting.GREEN + Config.MESSAGE_BUILDING_CLEARED.get()));
                                 executeCommands(player, source.getLevel(), Config.COMMAND_CLEARED.get());
                             } else if (data.getNumberKilled() == data.getTotalMobs() / 2) {
-                                source.sendMessage(new TextComponent(ChatFormatting.YELLOW + Config.MESSAGE_BUILDING_HALFWAY.get()), Util.NIL_UUID);
+                                source.sendSystemMessage(Component.literal(ChatFormatting.YELLOW + Config.MESSAGE_BUILDING_HALFWAY.get()));
                             }
                         }
                         LostSoulData.getData(event.getEntity().getLevel()).setDirty();
