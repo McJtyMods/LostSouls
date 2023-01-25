@@ -5,6 +5,7 @@ import mcjty.lostcities.api.ILostCityInformation;
 import mcjty.lostcities.varia.ChunkCoord;
 import mcjty.lostsouls.setup.Config;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -74,7 +75,7 @@ public class LostSoulData extends SavedData {
         ListTag list = nbt.getList("chunks", Tag.TAG_COMPOUND);
         for (Tag tag : list) {
             CompoundTag tc = (CompoundTag) tag;
-            ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(tc.getString("dim")));
+            ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(tc.getString("dim")));
             int x = tc.getInt("x");
             int z = tc.getInt("z");
             ChunkCoord cc = new ChunkCoord(dim, x, z);
