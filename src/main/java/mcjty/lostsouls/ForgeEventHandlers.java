@@ -288,7 +288,7 @@ public class ForgeEventHandlers {
 
     @SubscribeEvent
     public void onKill(LivingDeathEvent event) {
-        Entity source = event.getSource().getDirectEntity();
+        Entity source = event.getSource().getEntity();
         if (source instanceof ServerPlayer player) {
             for (String tag : event.getEntity().getTags()) {
                 if (tag.startsWith("_ls_/")) {
