@@ -132,7 +132,13 @@ public class ForgeEventHandlers {
         BlockPos position = player.blockPosition();
         int chunkX = position.getX() >> 4;
         int chunkZ = position.getZ() >> 4;
-        ILostChunkInfo chunkInfo = lost.getChunkInfo(chunkX, chunkZ);
+        ILostChunkInfo chunkInfo = null;
+        try {
+            chunkInfo = lost.getChunkInfo(chunkX, chunkZ);
+        } catch (Exception e) {
+            LostSouls.logger.error("Error handling spawn {},{}: {}", chunkX, chunkZ, e.getMessage(), e);
+            return;
+        }
         String buildingType = chunkInfo.getBuildingType();
         if (buildingType != null) {
             // We have a building
