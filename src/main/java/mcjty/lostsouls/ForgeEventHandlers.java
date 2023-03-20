@@ -169,13 +169,13 @@ public class ForgeEventHandlers {
                     double y = (position.getY() + rand.nextInt(3) - 1);
                     double z = chunkZ * 16 + rand.nextDouble() * 16.0;
 
-                    if (world.getBlockState(new BlockPos(x, y - 1, z)).isAir()) {
+                    if (world.getBlockState(new BlockPos((int) x, (int) (y - 1), (int) z)).isAir()) {
                         y--;
                     }
-                    if (!world.getBlockState(new BlockPos(x, y, z)).isAir()) {
+                    if (!world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
                         y++;
                     }
-                    if (world.getBlockState(new BlockPos(x, y, z)).isAir()) {
+                    if (world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
                         double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
                         if (distance >= Config.MIN_SPAWN_DISTANCE.get()) {
                             String mob = Tools.getRandomFromList(rand, Config.getRandomMobs());
