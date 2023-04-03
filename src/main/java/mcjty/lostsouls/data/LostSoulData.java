@@ -1,7 +1,7 @@
 package mcjty.lostsouls.data;
 
-import mcjty.lostcities.api.ILostChunkInfo;
 import mcjty.lostcities.api.ILostCityInformation;
+import mcjty.lostcities.api.ILostSphere;
 import mcjty.lostcities.varia.ChunkCoord;
 import mcjty.lostsouls.setup.Config;
 import net.minecraft.core.Registry;
@@ -56,8 +56,8 @@ public class LostSoulData extends SavedData {
             if (lost == null) {
                 data.initialize(world, cc, Config.HAUNTED_CHANCE.get(), Config.MIN_MOBS.get(), Config.MAX_MOBS.get());
             } else {
-                ILostChunkInfo info = lost.getChunkInfo(cc.chunkX(), cc.chunkZ());
-                if (info.getSphere() != null) {
+                ILostSphere sphere = lost.getSphere(cc.chunkX() << 4, cc.chunkZ() << 4);
+                if (sphere != null) {
                     data.initialize(world, cc, Config.SPHERE_HAUNTED_CHANCE.get(), Config.SPHERE_MIN_MOBS.get(), Config.SPHERE_MAX_MOBS.get());
                 } else {
                     data.initialize(world, cc, Config.HAUNTED_CHANCE.get(), Config.MIN_MOBS.get(), Config.MAX_MOBS.get());

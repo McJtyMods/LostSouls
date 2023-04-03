@@ -1,3 +1,6 @@
+Upcoming:
+- Fixed a problem where the sphere chance would also be used even if the world doesn't have spheres
+
 1.18-2.0.2:
 - Fixed a problem that haunted mobs killed by arrows wouldn't count against the kill bonus
 
