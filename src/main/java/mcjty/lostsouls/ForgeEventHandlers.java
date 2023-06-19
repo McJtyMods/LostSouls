@@ -95,7 +95,7 @@ public class ForgeEventHandlers {
             BlockPos position = player.blockPosition();
             int chunkX = position.getX() >> 4;
             int chunkZ = position.getZ() >> 4;
-            ChunkCoord chunkCoord = new ChunkCoord(player.getLevel().dimension(), chunkX, chunkZ);
+            ChunkCoord chunkCoord = new ChunkCoord(player.level().dimension(), chunkX, chunkZ);
             boolean entered = false;
 
             if (!playerChunks.containsKey(uuid)) {
@@ -111,7 +111,7 @@ public class ForgeEventHandlers {
             }
 
 
-            ILostCityInformation info = ModSetup.lostCities.getLostInfo(player.getLevel());
+            ILostCityInformation info = ModSetup.lostCities.getLostInfo(player.level());
             if (info != null) {
                 handleSpawn(player, info, entered);
             }
@@ -136,7 +136,7 @@ public class ForgeEventHandlers {
         String buildingType = chunkInfo.getBuildingType();
         if (buildingType != null) {
             // We have a building
-            Level world = player.getLevel();
+            Level world = player.level();
             RandomSource rand = world.getRandom();
             LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, lost);
             if (isHaunted(data, buildingType)) {
@@ -298,17 +298,17 @@ public class ForgeEventHandlers {
                         int x = Integer.parseInt(split[2]);
                         int z = Integer.parseInt(split[3]);
                         // Should be in the cache, so we don't need a provider
-                        LostChunkData data = LostSoulData.getSoulData(event.getEntity().getLevel(), x, z, null);
+                        LostChunkData data = LostSoulData.getSoulData(event.getEntity().level(), x, z, null);
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED.get()) {
                             if (data.getNumberKilled() == data.getTotalMobs()) {
                                 source.sendSystemMessage(Component.literal(ChatFormatting.GREEN + Config.MESSAGE_BUILDING_CLEARED.get()));
-                                executeCommands(player, source.getLevel(), Config.COMMAND_CLEARED.get());
+                                executeCommands(player, source.level(), Config.COMMAND_CLEARED.get());
                             } else if (data.getNumberKilled() == data.getTotalMobs() / 2) {
                                 source.sendSystemMessage(Component.literal(ChatFormatting.YELLOW + Config.MESSAGE_BUILDING_HALFWAY.get()));
                             }
                         }
-                        LostSoulData.getData(event.getEntity().getLevel()).setDirty();
+                        LostSoulData.getData(event.getEntity().level()).setDirty();
                     } catch (NumberFormatException e) {
                         LostSouls.logger.error("ForgeEventHandlers.onKill ERROR", e);
                     }

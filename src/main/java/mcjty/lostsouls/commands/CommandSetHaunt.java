@@ -30,9 +30,9 @@ public class CommandSetHaunt implements Command<CommandSourceStack> {
         Integer todo = context.getArgument("todo", Integer.class);
         ServerPlayer player = context.getSource().getPlayerOrException();
         BlockPos position = player.blockPosition();
-        LostChunkData soulData = LostSoulData.getSoulData(player.getLevel(), position.getX() >> 4, position.getZ() >> 4, null);
+        LostChunkData soulData = LostSoulData.getSoulData(player.level(), position.getX() >> 4, position.getZ() >> 4, null);
         soulData.setNumberKilled(todo);
-        LostSoulData.getData(player.getLevel()).setDirty();
+        LostSoulData.getData(player.level()).setDirty();
         return 0;
     }
 }

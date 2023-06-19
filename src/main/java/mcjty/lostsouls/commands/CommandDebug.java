@@ -27,7 +27,7 @@ public class CommandDebug implements Command<CommandSourceStack> {
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = context.getSource().getPlayerOrException();
         BlockPos position = player.blockPosition();
-        LostChunkData soulData = LostSoulData.getSoulData(player.getLevel(), position.getX() >> 4, position.getZ() >> 4, null);
+        LostChunkData soulData = LostSoulData.getSoulData(player.level(), position.getX() >> 4, position.getZ() >> 4, null);
         System.out.println("soulData.isHaunted() = " + soulData.isHaunted());
         System.out.println("soulData.getMaxMobs() = " + soulData.getTotalMobs());
         System.out.println("soulData.getNumberKilled() = " + soulData.getNumberKilled());
