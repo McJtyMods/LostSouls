@@ -48,5 +48,5 @@ dependencies {
     lostcities()
 }
 
-cfdeps(['the-one-probe'], ['the-lost-cities'], ['1.19.4'])
-modrinth(['the-one-probe'], ['the-lost-cities'], ['1.19.4'])
+cfdeps(['the-one-probe'], ['the-lost-cities'], [])
+modrinth(['the-one-probe'], ['the-lost-cities'], [])
