@@ -1,6 +1,6 @@
 modLoader="javafml"
 license="MIT License https://github.com/McJtyMods/LostSouls/blob/1.18/LICENCE"
-loaderVersion="[31,)"
+loaderVersion="[47,)"
 issueTrackerURL="http://github.com/McJtyMods/LostSouls/issues"
 displayURL="http://github.com/McJtyMods/LostSouls/"
 #logoFile="examplemod.png" #optional
