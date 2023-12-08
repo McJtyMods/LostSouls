@@ -1,4 +1,4 @@
-Upcoming:
+1.20-4.0.1:
 - Fixed a problem parsing the mob tag which could cause crashes in case the dimension name contains a /
 
 
