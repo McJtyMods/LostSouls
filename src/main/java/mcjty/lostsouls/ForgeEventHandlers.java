@@ -292,11 +292,12 @@ public class ForgeEventHandlers {
         if (source instanceof ServerPlayer player) {
             for (String tag : event.getEntity().getTags()) {
                 if (tag.startsWith("_ls_/")) {
+                    // 'tag' is a string delimited with /. It can have any number of parts. We only need the two last parts as integer
                     String[] split = StringUtils.split(tag, '/');
                     try {
-                        String dim = split[1];
-                        int x = Integer.parseInt(split[2]);
-                        int z = Integer.parseInt(split[3]);
+//                        String dim = split[1];
+                        int x = Integer.parseInt(split[split.length - 2]);
+                        int z = Integer.parseInt(split[split.length - 1]);
                         // Should be in the cache, so we don't need a provider
                         LostChunkData data = LostSoulData.getSoulData(event.getEntity().level(), x, z, null);
                         data.newKill();
