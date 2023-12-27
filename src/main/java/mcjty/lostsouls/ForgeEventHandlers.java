@@ -175,7 +175,7 @@ public class ForgeEventHandlers {
                     if (!world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
                         y++;
                     }
-                    if (world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
+                    if (world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir() && !world.getBlockState(new BlockPos((int) x, (int) (y - 1), (int) z)).isAir()) {
                         double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
                         if (distance >= Config.MIN_SPAWN_DISTANCE.get()) {
                             String mob = Tools.getRandomFromList(rand, Config.getRandomMobs());
