@@ -1,7 +1,6 @@
 1.20-4.0.1:
 - Fixed a problem parsing the mob tag which could cause crashes in case the dimension name contains a /
 
-
 1.20-4.0.0:
 - Port to 1.20
 - Fixed a problem where the sphere chance would also be used even if the world doesn't have spheres
