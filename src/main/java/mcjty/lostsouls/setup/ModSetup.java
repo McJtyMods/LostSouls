@@ -2,9 +2,9 @@ package mcjty.lostsouls.setup;
 
 import mcjty.lostcities.api.ILostCities;
 import mcjty.lostsouls.ForgeEventHandlers;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.MinecraftForge;
+import net.neoforged.neoforge.fml.InterModComms;
+import net.neoforged.neoforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import javax.annotation.Nullable;
 import java.util.function.Function;

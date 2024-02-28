@@ -2,10 +2,10 @@ package mcjty.lostsouls;
 
 import mcjty.lostsouls.setup.Config;
 import mcjty.lostsouls.setup.ModSetup;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.fml.ModLoadingContext;
+import net.neoforged.neoforge.fml.common.Mod;
+import net.neoforged.neoforge.fml.config.ModConfig;
+import net.neoforged.neoforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
