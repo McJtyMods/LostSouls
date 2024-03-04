@@ -2,9 +2,9 @@ package mcjty.lostsouls.setup;
 
 import mcjty.lostcities.api.ILostCities;
 import mcjty.lostsouls.ForgeEventHandlers;
-import net.neoforged.neoforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.fml.InterModComms;
-import net.neoforged.neoforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -14,7 +14,7 @@ public class ModSetup {
     public static ILostCities lostCities;
 
     public void init(FMLCommonSetupEvent e) {
-        MinecraftForge.EVENT_BUS.register(new ForgeEventHandlers());
+        NeoForge.EVENT_BUS.register(new ForgeEventHandlers());
         InterModComms.sendTo(ILostCities.LOSTCITIES, ILostCities.GET_LOST_CITIES, ModSetup.GetLostCities::new);
     }
 

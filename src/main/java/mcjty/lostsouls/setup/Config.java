@@ -1,7 +1,7 @@
 package mcjty.lostsouls.setup;
 
 import com.google.common.collect.Lists;
-import net.neoforged.neoforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -14,42 +14,42 @@ public class Config {
 
     public static final String CATEGORY_GENERAL = "general";
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_FIRSTTIME;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_ENTERED;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_CLEARED;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> COMMAND_FIRSTTIME;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> COMMAND_ENTERED;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> COMMAND_CLEARED;
 
     private static String[] DEF_COMMAND_FIRSTTIME = new String[]{};
     private static String[] DEF_COMMAND_ENTERED = new String[]{};
     private static String[] DEF_COMMAND_CLEARED = new String[]{};
 
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
     private final static String DEF_MESSAGE_UNSAFE_BUILDING = "The building isn't safe enough!";
     private final static String DEF_MESSAGE_BUILDING_HAUNTED = "This building is haunted. Be careful!";
     private final static String DEF_MESSAGE_BUILDING_CLEARED = "The building feels a lot safer now!";
     private final static String DEF_MESSAGE_BUILDING_HALFWAY = "About half way there! Keep going!";
 
-    public static ForgeConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
-    public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
-    public static ForgeConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
-    public static ForgeConfigSpec.DoubleValue HAUNTED_CHANCE;// = 0.8f;
-    public static ForgeConfigSpec.IntValue MIN_MOBS;// = 10;
-    public static ForgeConfigSpec.IntValue MAX_MOBS;// = 50;
-    public static ForgeConfigSpec.DoubleValue SPHERE_HAUNTED_CHANCE;// = 0.8f;
-    public static ForgeConfigSpec.IntValue SPHERE_MIN_MOBS;// = 10;
-    public static ForgeConfigSpec.IntValue SPHERE_MAX_MOBS;// = 50;
-    public static ForgeConfigSpec.DoubleValue MIN_HEALTH_BONUS;// = 2f;
-    public static ForgeConfigSpec.DoubleValue MAX_HEALTH_BONUS;// = 5f;
-    public static ForgeConfigSpec.DoubleValue MIN_DAMAGE_BONUS;// = 2f;
-    public static ForgeConfigSpec.DoubleValue MAX_DAMAGE_BONUS;// = 5f;
-    public static ForgeConfigSpec.BooleanValue CHECK_VALID_SPAWN;// = false;
-    public static ForgeConfigSpec.BooleanValue LOCK_CHESTS_UNTIL_CLEARED;// = true;
-    public static ForgeConfigSpec.BooleanValue LOCK_ONLY_CHESTS;// = true;
-    public static ForgeConfigSpec.BooleanValue ANNOUNCE_CLEARED;// = true;
-    public static ForgeConfigSpec.BooleanValue ANNOUNCE_ENTER;// = true;
-    public static ForgeConfigSpec.BooleanValue ANNOUNCE_CHESTLOCKED;// = true;
+    public static ModConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
+    public static ModConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
+    public static ModConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
+    public static ModConfigSpec.DoubleValue HAUNTED_CHANCE;// = 0.8f;
+    public static ModConfigSpec.IntValue MIN_MOBS;// = 10;
+    public static ModConfigSpec.IntValue MAX_MOBS;// = 50;
+    public static ModConfigSpec.DoubleValue SPHERE_HAUNTED_CHANCE;// = 0.8f;
+    public static ModConfigSpec.IntValue SPHERE_MIN_MOBS;// = 10;
+    public static ModConfigSpec.IntValue SPHERE_MAX_MOBS;// = 50;
+    public static ModConfigSpec.DoubleValue MIN_HEALTH_BONUS;// = 2f;
+    public static ModConfigSpec.DoubleValue MAX_HEALTH_BONUS;// = 5f;
+    public static ModConfigSpec.DoubleValue MIN_DAMAGE_BONUS;// = 2f;
+    public static ModConfigSpec.DoubleValue MAX_DAMAGE_BONUS;// = 5f;
+    public static ModConfigSpec.BooleanValue CHECK_VALID_SPAWN;// = false;
+    public static ModConfigSpec.BooleanValue LOCK_CHESTS_UNTIL_CLEARED;// = true;
+    public static ModConfigSpec.BooleanValue LOCK_ONLY_CHESTS;// = true;
+    public static ModConfigSpec.BooleanValue ANNOUNCE_CLEARED;// = true;
+    public static ModConfigSpec.BooleanValue ANNOUNCE_ENTER;// = true;
+    public static ModConfigSpec.BooleanValue ANNOUNCE_CHESTLOCKED;// = true;
 
     private static String[] DEF_EXCLUDED_BUILDINGS = new String[]{};
     private static String[] DEF_MOBS = new String[]{".3=minecraft:zombie", ".3=minecraft:spider", ".3=minecraft:skeleton", ".2=minecraft:husk", ".2=minecraft:stray", ".1=minecraft:witch", ".1=minecraft:enderman"};
@@ -60,14 +60,14 @@ public class Config {
     private static String[] DEF_RANDOM_BOOTS = new String[]{".3=null", ".3=minecraft:diamond_boots", ".3=minecraft:iron_boots"};
     private static String[] DEF_RANDOM_EFFECTS = new String[]{".3=minecraft:regeneration,3", ".3=minecraft:speed,3", ".3=minecraft:fire_resistance,3"};
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_BUILDINGS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> MOBS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_WEAPONS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_HELMETS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_CHESTS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_LEGGINGS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_BOOTS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_EFFECTS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_BUILDINGS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> MOBS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_WEAPONS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_HELMETS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_CHESTS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_LEGGINGS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_BOOTS;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_EFFECTS;
 
     private static Set<String> excludedBuildings = null;
     private static List<Pair<Float, String>> randomMobs = null;
@@ -78,7 +78,7 @@ public class Config {
     private static List<Pair<Float, String>> randomBoots = null;
     private static List<Pair<Float, String>> randomEffects = null;
 
-    private static final ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
+    private static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
 
     public static void register() {
         SERVER_BUILDER.comment("General settings").push(CATEGORY_GENERAL);
@@ -196,7 +196,7 @@ public class Config {
         SERVER_CONFIG = SERVER_BUILDER.build();
     }
 
-    public static ForgeConfigSpec SERVER_CONFIG;
+    public static ModConfigSpec SERVER_CONFIG;
 
     public static Set<String> getExcludedBuildings() {
         if (excludedBuildings == null) {
