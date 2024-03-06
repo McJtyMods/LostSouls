@@ -1,5 +1,6 @@
 Upcoming:
 - Fixed a problem where the sphere chance would also be used even if the world doesn't have spheres
+- TqLxQuanZ added a new spawnOnBlock config option to force mobs to spawn on blocks. This prevents them from spawning in thin air
 
 1.18-2.0.2:
 - Fixed a problem that haunted mobs killed by arrows wouldn't count against the kill bonus
