@@ -45,6 +45,7 @@ public class Config {
     public static ForgeConfigSpec.DoubleValue MIN_DAMAGE_BONUS;// = 2f;
     public static ForgeConfigSpec.DoubleValue MAX_DAMAGE_BONUS;// = 5f;
     public static ForgeConfigSpec.BooleanValue CHECK_VALID_SPAWN;// = false;
+    public static ForgeConfigSpec.BooleanValue SPAWN_ON_BLOCK;// = false;
     public static ForgeConfigSpec.BooleanValue LOCK_CHESTS_UNTIL_CLEARED;// = true;
     public static ForgeConfigSpec.BooleanValue LOCK_ONLY_CHESTS;// = true;
     public static ForgeConfigSpec.BooleanValue ANNOUNCE_CLEARED;// = true;
@@ -176,6 +177,9 @@ public class Config {
         CHECK_VALID_SPAWN = SERVER_BUILDER
                 .comment("If this is true then mobs will only spawn if the light level is low enough. Otherwise they spawn regardless of light level")
                 .define("checkValidSpawn", false);
+        SPAWN_ON_BLOCK = SERVER_BUILDER
+                .comment("If this is true then mobs will only spawn on blocks but not on air")
+                .define("spawnOnBlock", false);
         ANNOUNCE_CLEARED = SERVER_BUILDER
                 .comment("If this is true then the player will be notified when a building is cleared")
                 .define("announceCleared", true);
