@@ -1,5 +1,6 @@
 1.20-4.0.1:
 - Fixed a problem parsing the mob tag which could cause crashes in case the dimension name contains a /
+- TqLxQuanZ added a new spawnOnBlock config option to force mobs to spawn on blocks. This prevents them from spawning in thin air
 
 1.20-4.0.0:
 - Port to 1.20
