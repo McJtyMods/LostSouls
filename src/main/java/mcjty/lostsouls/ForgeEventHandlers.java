@@ -183,7 +183,7 @@ public class ForgeEventHandlers {
                         double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
                         if (distance >= Config.MIN_SPAWN_DISTANCE.get()) {
                             String mob = Tools.getRandomFromList(rand, Config.getRandomMobs());
-                            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(mob));
+                            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(new ResourceLocation(mob));
                             if (type == null) {
                                 throw new RuntimeException("Unknown entity '" + mob + "'!");
                             }
@@ -255,35 +255,35 @@ public class ForgeEventHandlers {
 
         String weapon = Tools.getRandomFromList(rand, Config.getRandomWeapons());
         if (!"null".equals(weapon)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(weapon));
+            Item item = BuiltInRegistries.ITEM.getValue(new ResourceLocation(weapon));
             if (item != null) {
                 entity.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
             }
         }
         String helmet = Tools.getRandomFromList(rand, Config.getRandomHelmets());
         if (!"null".equals(helmet)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(helmet));
+            Item item = BuiltInRegistries.ITEM.getValue(new ResourceLocation(helmet));
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(item));
             }
         }
         String chestplate = Tools.getRandomFromList(rand, Config.getRandomChests());
         if (!"null".equals(chestplate)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(chestplate));
+            Item item = BuiltInRegistries.ITEM.getValue(new ResourceLocation(chestplate));
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(item));
             }
         }
         String leggings = Tools.getRandomFromList(rand, Config.getRandomLeggings());
         if (!"null".equals(leggings)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(leggings));
+            Item item = BuiltInRegistries.ITEM.getValue(new ResourceLocation(leggings));
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.LEGS, new ItemStack(item));
             }
         }
         String boots = Tools.getRandomFromList(rand, Config.getRandomBoots());
         if (!"null".equals(boots)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(boots));
+            Item item = BuiltInRegistries.ITEM.getValue(new ResourceLocation(boots));
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.FEET, new ItemStack(item));
             }

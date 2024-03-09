@@ -3,7 +3,7 @@ package mcjty.lostsouls.setup;
 import mcjty.lostcities.api.ILostCities;
 import mcjty.lostsouls.ForgeEventHandlers;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.fml.InterModComms;
+import net.neoforged.fml.InterModComms;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import javax.annotation.Nullable;
