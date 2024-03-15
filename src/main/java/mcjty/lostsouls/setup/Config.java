@@ -22,14 +22,14 @@ public class Config {
     private static String[] DEF_COMMAND_ENTERED = new String[]{};
     private static String[] DEF_COMMAND_CLEARED = new String[]{};
 
-    public static ModConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
-    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
-    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
-    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
-    private final static String DEF_MESSAGE_UNSAFE_BUILDING = "The building isn't safe enough!";
-    private final static String DEF_MESSAGE_BUILDING_HAUNTED = "This building is haunted. Be careful!";
-    private final static String DEF_MESSAGE_BUILDING_CLEARED = "The building feels a lot safer now!";
-    private final static String DEF_MESSAGE_BUILDING_HALFWAY = "About half way there! Keep going!";
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
+    private final static String DEF_MESSAGE_UNSAFE_BUILDING = "§eThe building isn't safe enough!";
+    private final static String DEF_MESSAGE_BUILDING_HAUNTED = "§eThis building is haunted. Be careful!";
+    private final static String DEF_MESSAGE_BUILDING_CLEARED = "§aThe building feels a lot safer now!";
+    private final static String DEF_MESSAGE_BUILDING_HALFWAY = "§eAbout half way there! Keep going!";
 
     public static ModConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
     public static ModConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
