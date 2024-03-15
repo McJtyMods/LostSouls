@@ -9,9 +9,10 @@ import mcjty.lostsouls.setup.Config;
 import mcjty.lostsouls.setup.ModSetup;
 import mcjty.lostsouls.varia.ChunkCoord;
 import mcjty.lostsouls.varia.Tools;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -72,7 +73,8 @@ public class ForgeEventHandlers {
                     if (isHaunted(data, buildingType)) {
                         event.setCanceled(true);
                         if (Config.ANNOUNCE_CHESTLOCKED.get()) {
-                            event.getEntity().sendSystemMessage(Component.literal(ChatFormatting.YELLOW + Config.MESSAGE_UNSAFE_BUILDING.get()));
+                            MutableComponent unsafeMessage = Component.translatable(Config.MESSAGE_BUILDING_HAUNTED.get());
+                            event.getEntity().sendSystemMessage(unsafeMessage);
                         }
                     }
                 }
@@ -152,7 +154,8 @@ public class ForgeEventHandlers {
                     int enteredCount = data.getEnteredCount();
                     if (enteredCount == 1 && Config.ANNOUNCE_ENTER.get()) {
                         // First time
-                        player.sendSystemMessage(Component.literal(ChatFormatting.YELLOW + Config.MESSAGE_BUILDING_HAUNTED.get()));
+                        MutableComponent firstMessage = Component.translatable(Config.MESSAGE_BUILDING_HAUNTED.get());
+                        player.sendSystemMessage(firstMessage);
                     }
                     if (enteredCount == 1) {
                         executeCommands(player, world, Config.COMMAND_FIRSTTIME.get());
@@ -312,10 +315,12 @@ public class ForgeEventHandlers {
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED.get()) {
                             if (data.getNumberKilled() == data.getTotalMobs()) {
-                                source.sendSystemMessage(Component.literal(ChatFormatting.GREEN + Config.MESSAGE_BUILDING_CLEARED.get()));
+                                TranslatableComponent clearMessage = new TranslatableComponent(Config.MESSAGE_BUILDING_CLEARED.get());
+                                player.sendMessage(clearMessage, Util.NIL_UUID);
                                 executeCommands(player, source.getLevel(), Config.COMMAND_CLEARED.get());
                             } else if (data.getNumberKilled() == data.getTotalMobs() / 2) {
-                                source.sendSystemMessage(Component.literal(ChatFormatting.YELLOW + Config.MESSAGE_BUILDING_HALFWAY.get()));
+                                TranslatableComponent halfwayMessage = new TranslatableComponent(Config.MESSAGE_BUILDING_HALFWAY.get());
+                                player.sendMessage(halfwayMessage, Util.NIL_UUID);
                             }
                         }
                         LostSoulData.getData(event.getEntity().getLevel()).setDirty();

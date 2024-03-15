@@ -1,3 +1,6 @@
+Upcoming:
+- TqLxQuanZ added support for translations for messages
+
 1.19-3.0.2:
 - Fixed a problem where the sphere chance would also be used even if the world doesn't have spheres
 - TqLxQuanZ added a new spawnOnBlock config option to force mobs to spawn on blocks. This prevents them from spawning in thin air
