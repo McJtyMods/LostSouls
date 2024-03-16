@@ -1,4 +1,4 @@
-Upcoming:
+1.19-3.0.3:
 - TqLxQuanZ added support for translations for messages
 
 1.19-3.0.2:
