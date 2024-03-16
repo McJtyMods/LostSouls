@@ -12,7 +12,6 @@ import mcjty.lostsouls.varia.Tools;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -315,12 +314,12 @@ public class ForgeEventHandlers {
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED.get()) {
                             if (data.getNumberKilled() == data.getTotalMobs()) {
-                                TranslatableComponent clearMessage = new TranslatableComponent(Config.MESSAGE_BUILDING_CLEARED.get());
-                                player.sendMessage(clearMessage, Util.NIL_UUID);
+                                MutableComponent clearMessage = Component.translatable(Config.MESSAGE_BUILDING_CLEARED.get());
+                                player.sendSystemMessage(clearMessage);
                                 executeCommands(player, source.getLevel(), Config.COMMAND_CLEARED.get());
                             } else if (data.getNumberKilled() == data.getTotalMobs() / 2) {
-                                TranslatableComponent halfwayMessage = new TranslatableComponent(Config.MESSAGE_BUILDING_HALFWAY.get());
-                                player.sendMessage(halfwayMessage, Util.NIL_UUID);
+                                MutableComponent halfwayMessage = Component.translatable(Config.MESSAGE_BUILDING_HALFWAY.get());
+                                player.sendSystemMessage(halfwayMessage);
                             }
                         }
                         LostSoulData.getData(event.getEntity().getLevel()).setDirty();
