@@ -24,6 +24,7 @@ public class Config {
 
     public static ForgeConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
     public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
+    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED_REPEAT;
     public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
     public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
     private final static String DEF_MESSAGE_UNSAFE_BUILDING = "§eThe building isn't safe enough!";
@@ -31,6 +32,7 @@ public class Config {
     private final static String DEF_MESSAGE_BUILDING_CLEARED = "§aThe building feels a lot safer now!";
     private final static String DEF_MESSAGE_BUILDING_HALFWAY = "§eAbout half way there! Keep going!";
 
+    public static ForgeConfigSpec.LongValue MESSAGE_INTERVAL;// = 12000; 10 minutes
     public static ForgeConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
     public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
     public static ForgeConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
@@ -125,6 +127,9 @@ public class Config {
         MESSAGE_BUILDING_HAUNTED = SERVER_BUILDER
                 .comment("This message is given when the player enters a haunted building for the first time")
                 .define("messageBuildingHaunted", DEF_MESSAGE_BUILDING_HAUNTED);
+        MESSAGE_BUILDING_HAUNTED_REPEAT = SERVER_BUILDER
+                .comment("This message is given when the player enters a haunted building after at least 'messageInterval' ticks have passed. Use <same> to have the same message as the first time")
+                .define("messageBuildingHauntedRepeat", "<same>");
         MESSAGE_BUILDING_CLEARED = SERVER_BUILDER
                 .comment("This message is given when the player clears a building")
                 .define("messageBuildingCleared", DEF_MESSAGE_BUILDING_CLEARED);
@@ -132,7 +137,9 @@ public class Config {
                 .comment("This message is given when the player is halfway clearing a building")
                 .define("messageBuildingHalfway", DEF_MESSAGE_BUILDING_HALFWAY);
 
-
+        MESSAGE_INTERVAL = SERVER_BUILDER
+                .comment("The delay (in ticks) before a new 'haunted' message is given to the player")
+                .defineInRange("messageInterval", 12000L, 1, 1000000);
         SERVERTICK_TIMEOUT = SERVER_BUILDER
                 .comment("The amount of ticks that the server waits before checking for new spawns")
                 .defineInRange("serverTickTimeout", 200, 1, 1000000);

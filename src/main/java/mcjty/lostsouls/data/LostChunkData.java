@@ -12,10 +12,12 @@ public class LostChunkData {
     private int totalMobs;
     private int numberKilled;
     private int enteredCount;   // Count the number of times a player has entered this building
+    private long messagetime;
 
-    public LostChunkData(ChunkCoord cc) {
+    public LostChunkData() {
         numberKilled = 0;
         enteredCount = 0;
+        messagetime = -1;
     }
 
     public void initialize(ServerLevel level, ChunkCoord cc, double hauntedChance, int minMobs, int maxMobs) {
@@ -54,11 +56,24 @@ public class LostChunkData {
         enteredCount++;
     }
 
+    public void setMessagetime(long messagetime) {
+        this.messagetime = messagetime;
+    }
+
+    public long getMessagetime() {
+        return messagetime;
+    }
+
     public void readFromNBT(CompoundTag nbt) {
         haunted = nbt.getBoolean("haunted");
         totalMobs = nbt.getInt("max");
         numberKilled = nbt.getInt("killed");
         enteredCount = nbt.getInt("enteredCount");
+        if (nbt.contains("messagetime")) {
+            messagetime = nbt.getLong("messagetime");
+        } else {
+            messagetime = -1;
+        }
     }
 
     public void writeToNBT(CompoundTag compound) {
@@ -66,5 +81,6 @@ public class LostChunkData {
         compound.putInt("max", totalMobs);
         compound.putInt("killed", numberKilled);
         compound.putInt("enteredCount", enteredCount);
+        compound.putLong("messagetime", messagetime);
     }
 }
