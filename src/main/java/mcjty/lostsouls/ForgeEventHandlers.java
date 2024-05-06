@@ -9,10 +9,13 @@ import mcjty.lostsouls.setup.Config;
 import mcjty.lostsouls.setup.ModSetup;
 import mcjty.lostsouls.varia.ChunkCoord;
 import mcjty.lostsouls.varia.Tools;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.RandomSource;
@@ -28,6 +31,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -145,16 +150,28 @@ public class ForgeEventHandlers {
             // We have a building
             Level world = player.getLevel();
             RandomSource rand = world.getRandom();
+            long gameTime = world.getGameTime();
             LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, lost);
             if (isHaunted(data, buildingType)) {
                 if (entered) {
                     data.enterBuilding();
                     LostSoulData.getData(world).setDirty();
                     int enteredCount = data.getEnteredCount();
-                    if (enteredCount == 1 && Config.ANNOUNCE_ENTER.get()) {
-                        // First time
-                        MutableComponent firstMessage = Component.translatable(Config.MESSAGE_BUILDING_HAUNTED.get());
-                        player.sendSystemMessage(firstMessage);
+                    if (Config.ANNOUNCE_ENTER.get()) {
+                        long lastMessagetime = data.getMessagetime();
+                        if (enteredCount == 1) {
+                            // First time
+                            MutableComponent firstMessage = Component.translatable(Config.MESSAGE_BUILDING_HAUNTED.get());
+                            player.sendSystemMessage(firstMessage);
+                        } else if (lastMessagetime + Config.MESSAGE_INTERVAL.get() < gameTime) {
+                            String msg = Config.MESSAGE_BUILDING_HAUNTED_REPEAT.get();
+                            if ("<same>".equals(msg)) {
+                                msg = Config.MESSAGE_BUILDING_HAUNTED.get();
+                            }
+                            MutableComponent message = Component.translatable(msg);
+                            player.sendSystemMessage(message);
+                        }
+                        data.setMessagetime(gameTime);
                     }
                     if (enteredCount == 1) {
                         executeCommands(player, world, Config.COMMAND_FIRSTTIME.get());
@@ -216,19 +233,37 @@ public class ForgeEventHandlers {
         }
     }
 
+    private static final Component DEFAULT_NAME = Component.literal("@");
+    private static final CommandSource EMPTY = new CommandSource() {
+        @Override
+        public void sendSystemMessage(Component component) {
+        }
+
+        @Override
+        public boolean acceptsSuccess() {
+            return false;
+        }
+
+        @Override
+        public boolean acceptsFailure() {
+            return false;
+        }
+
+        @Override
+        public boolean shouldInformAdmins() {
+            return false;
+        }
+    };
+
     private void executeCommands(ServerPlayer player, Level world, List<? extends String> commands) {
-        if (commands.size() > 0) {
-            // @todo 1.18
-//            CommandSenderWrapper sender = new CommandSenderWrapper(player, player.getPositionVector(), player.getPosition(), 4, player, null) {
-//                @Override
-//                public boolean canUseCommand(int permLevel, String commandName) {
-//                    return true;
-//                }
-//            };
-//            MinecraftServer server = world.getMinecraftServer();
-//            for (String cmd : commands) {
-//                server.commandManager.executeCommand(sender, cmd);
-//            }
+        if (!commands.isEmpty()) {
+            BlockPos pos = player.blockPosition();
+            ServerLevel level = (ServerLevel) world;
+            CommandSourceStack stack = new CommandSourceStack(EMPTY, Vec3.atCenterOf(pos), Vec2.ZERO, level, 2,
+                    DEFAULT_NAME.getString(), DEFAULT_NAME, level.getServer(), player);
+            for (String command : commands) {
+                level.getServer().getCommands().performPrefixedCommand(stack, command);
+            }
         }
     }
 

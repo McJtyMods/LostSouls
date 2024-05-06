@@ -53,7 +53,7 @@ public class LostSoulData extends SavedData {
 
     private LostChunkData getSoulData(ServerLevel world, ChunkCoord cc, @Nullable ILostCityInformation lost) {
         if (!lostChunkDataMap.containsKey(cc)) {
-            LostChunkData data = new LostChunkData(cc);
+            LostChunkData data = new LostChunkData();
             if (lost == null) {
                 data.initialize(world, cc, Config.HAUNTED_CHANCE.get(), Config.MIN_MOBS.get(), Config.MAX_MOBS.get());
             } else {
@@ -78,10 +78,9 @@ public class LostSoulData extends SavedData {
             ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(tc.getString("dim")));
             int x = tc.getInt("x");
             int z = tc.getInt("z");
-            ChunkCoord cc = new ChunkCoord(dim, x, z);
-            LostChunkData data = new LostChunkData(cc);
+            LostChunkData data = new LostChunkData();
             data.readFromNBT(tc);
-            lostChunkDataMap.put(cc, data);
+            lostChunkDataMap.put(new ChunkCoord(dim, x, z), data);
         }
     }
 
