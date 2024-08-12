@@ -1,4 +1,4 @@
-Upcoming:
+1.19-3.1.0:
 - Lost Souls now properly supports multi buildings and sees them as a single building
 - New config options to modify the difficulty for a multi building
 - New datapack system in lostsouls/buildings to configure spawn chances for individual buildings or multi buildings
