@@ -3,8 +3,9 @@ package mcjty.lostsouls.data;
 import mcjty.lostcities.api.ILostChunkInfo;
 import mcjty.lostcities.api.ILostCityInformation;
 import mcjty.lostcities.api.ILostSphere;
-import mcjty.lostcities.varia.ChunkCoord;
+import mcjty.lostsouls.LostSouls;
 import mcjty.lostsouls.setup.Config;
+import mcjty.lostsouls.varia.ChunkCoord;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -28,6 +29,10 @@ public class LostSoulData extends SavedData {
 
     private final Map<ChunkCoord, LostChunkData> lostChunkDataMap = new HashMap<>();
 
+    // Cache for building settings from the registry
+    private Map<ResourceLocation, MobSettings> buildingSettings = null;
+    private Map<ResourceLocation, MobSettings> multiBuildingSettings = null;
+
     @Nonnull
     public static LostSoulData getData(Level world) {
         if (world.isClientSide) {
@@ -44,7 +49,6 @@ public class LostSoulData extends SavedData {
         load(tag);
     }
 
-
     @Nonnull
     public static LostChunkData getSoulData(Level world, int chunkX, int chunkZ, @Nullable ILostCityInformation lost) {
         LostSoulData data = getData(world);
@@ -52,20 +56,84 @@ public class LostSoulData extends SavedData {
         return data.getSoulData((ServerLevel) world, cc, lost);
     }
 
+    private void calculateSettingCache(ServerLevel level) {
+        if (buildingSettings == null) {
+            buildingSettings = new HashMap<>();
+            multiBuildingSettings = new HashMap<>();
+            Registry<MobSettings> registry = level.registryAccess().registryOrThrow(CustomRegistries.BUILDING_REGISTRY_KEY);
+            for (MobSettings r : registry) {
+                r.getBuildings().forEach(b -> buildingSettings.put(b, r));
+                r.getMultiBuildings().forEach(b -> multiBuildingSettings.put(b, r));
+            }
+        }
+    }
+
+    private MobSettings getSettingsForBuilding(ServerLevel level, ResourceLocation building) {
+        calculateSettingCache(level);
+        return buildingSettings.get(building);
+    }
+
+    private MobSettings getSettingsForMultiBuilding(ServerLevel level, ResourceLocation building) {
+        calculateSettingCache(level);
+        return multiBuildingSettings.get(building);
+    }
+
+    @Nonnull
+    public MobSettings getSettingsForChunk(ServerLevel world, ChunkCoord cc, @Nullable ILostCityInformation lost) {
+        if (lost == null) {
+            return Config.getDefaultSettings();
+        } else {
+            ILostSphere sphere = lost.getSphere(cc.chunkX() << 4, cc.chunkZ() << 4);
+            if (sphere != null) {
+                return Config.getDefaultSphereSettings();
+            }
+            ILostChunkInfo chunkInfo = lost.getChunkInfo(cc.chunkX(), cc.chunkZ());
+            ILostChunkInfo.MultiBuildingInfo mb = chunkInfo.getMultiBuildingInfo();
+            if (mb == null) {
+                ResourceLocation buildingType = chunkInfo.getBuildingId();
+                MobSettings mobSettings = getSettingsForBuilding(world, buildingType);
+                if (mobSettings == null) {
+                    mobSettings = Config.getDefaultSettings();
+                } else {
+                    mobSettings = MobSettings.merge(Config.getDefaultSettings(), mobSettings);
+                }
+                return mobSettings;
+            } else {
+                float chunks = mb.w() * mb.h();
+                MobSettings defaultMultiSettings = Config.getDefaultMultiSettings(chunks);
+                MobSettings mobSettings = getSettingsForMultiBuilding(world, mb.buildingType());
+                if (mobSettings == null) {
+                    mobSettings = defaultMultiSettings;
+                } else {
+                    mobSettings = MobSettings.merge(defaultMultiSettings, mobSettings);
+                }
+                return mobSettings;
+            }
+        }
+    }
+
     private LostChunkData getSoulData(ServerLevel world, ChunkCoord cc, @Nullable ILostCityInformation lost) {
         if (!lostChunkDataMap.containsKey(cc)) {
             LostChunkData data = new LostChunkData();
             if (lost == null) {
-                data.initialize(world, cc, Config.HAUNTED_CHANCE.get(), Config.MIN_MOBS.get(), Config.MAX_MOBS.get());
+                data.initialize(world, cc, Config.getDefaultSettings());
+                lostChunkDataMap.put(cc, data);
             } else {
-                ILostSphere sphere = lost.getSphere(cc.chunkX() << 4, cc.chunkZ() << 4);
-                if (sphere != null) {
-                    data.initialize(world, cc, Config.SPHERE_HAUNTED_CHANCE.get(), Config.SPHERE_MIN_MOBS.get(), Config.SPHERE_MAX_MOBS.get());
+                MobSettings settings = getSettingsForChunk(world, cc, lost);
+                data.initialize(world, cc, settings);
+                ILostChunkInfo chunkInfo = lost.getChunkInfo(cc.chunkX(), cc.chunkZ());
+                ILostChunkInfo.MultiBuildingInfo mb = chunkInfo.getMultiBuildingInfo();
+                if (mb != null) {
+                    ChunkCoord topleft = cc.offset(-mb.offsetX(), -mb.offsetZ());
+                    for (int x = 0; x < mb.w(); x++) {
+                        for (int z = 0; z < mb.h(); z++) {
+                            lostChunkDataMap.put(topleft.offset(x, z), data);
+                        }
+                    }
                 } else {
-                    data.initialize(world, cc, Config.HAUNTED_CHANCE.get(), Config.MIN_MOBS.get(), Config.MAX_MOBS.get());
+                    lostChunkDataMap.put(cc, data);
                 }
             }
-            lostChunkDataMap.put(cc, data);
             setDirty();
         }
         return lostChunkDataMap.get(cc);

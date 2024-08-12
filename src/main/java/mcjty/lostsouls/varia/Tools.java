@@ -1,29 +1,29 @@
 package mcjty.lostsouls.varia;
 
+import mcjty.lostsouls.data.MobSettings;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Tools {
 
-    public static String getRandomFromList(RandomSource random, List<Pair<Float, String>> list) {
+    public static ResourceLocation getRandomFromList(RandomSource random, List<MobSettings.RL> list) {
         if (list.isEmpty()) {
             return null;
         }
-        List<Pair<Float, String>> elements = new ArrayList<>();
+        List<MobSettings.RL> elements = new ArrayList<>();
         float totalweight = 0;
-        for (Pair<Float, String> pair : list) {
+        for (MobSettings.RL pair : list) {
             elements.add(pair);
-            totalweight += pair.getKey();
+            totalweight += pair.weight();
         }
         float r = random.nextFloat() * totalweight;
-        for (Pair<Float, String> pair : elements) {
-            r -= pair.getKey();
+        for (MobSettings.RL pair : elements) {
+            r -= pair.weight();
             if (r <= 0) {
-                return pair.getRight();
+                return pair.name();
             }
         }
         return null;

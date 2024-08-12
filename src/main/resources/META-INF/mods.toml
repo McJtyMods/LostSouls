@@ -24,6 +24,6 @@ Make Lost Cities a more dangerous place
 [[dependencies.lostsouls]]
     modId="lostcities"
     mandatory=true
-    versionRange="[1.18-5.2.0,)"
+    versionRange="[1.20-7.3.1,)"
     ordering="AFTER"
     side="BOTH"
