@@ -1,3 +1,8 @@
+Upcoming:
+- Lost Souls now properly supports multi buildings and sees them as a single building
+- New config options to modify the difficulty for a multi building
+- New datapack system in lostsouls/buildings to configure spawn chances for individual buildings or multi buildings
+
 1.19-3.0.4:
 - Commands work again
 - New feature to repeat the enter message if enough time has passed (10 minutes by default)

@@ -1,14 +1,12 @@
 package mcjty.lostsouls.setup;
 
 import com.google.common.collect.Lists;
+import mcjty.lostsouls.data.MobSettings;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Config {
 
@@ -37,8 +35,11 @@ public class Config {
     public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
     public static ForgeConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
     public static ForgeConfigSpec.DoubleValue HAUNTED_CHANCE;// = 0.8f;
+    public static ForgeConfigSpec.DoubleValue HAUNTED_CHANCE_MULTIPLIER;
     public static ForgeConfigSpec.IntValue MIN_MOBS;// = 10;
+    public static ForgeConfigSpec.DoubleValue MIN_MOBS_MULTIPLIER;
     public static ForgeConfigSpec.IntValue MAX_MOBS;// = 50;
+    public static ForgeConfigSpec.DoubleValue MAX_MOBS_MULTIPLIER;
     public static ForgeConfigSpec.DoubleValue SPHERE_HAUNTED_CHANCE;// = 0.8f;
     public static ForgeConfigSpec.IntValue SPHERE_MIN_MOBS;// = 10;
     public static ForgeConfigSpec.IntValue SPHERE_MAX_MOBS;// = 50;
@@ -63,23 +64,18 @@ public class Config {
     private static String[] DEF_RANDOM_BOOTS = new String[]{".3=null", ".3=minecraft:diamond_boots", ".3=minecraft:iron_boots"};
     private static String[] DEF_RANDOM_EFFECTS = new String[]{".3=minecraft:regeneration,3", ".3=minecraft:speed,3", ".3=minecraft:fire_resistance,3"};
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_BUILDINGS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> MOBS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_WEAPONS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_HELMETS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_CHESTS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_LEGGINGS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_BOOTS;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_EFFECTS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_BUILDINGS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> MOBS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_WEAPONS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_HELMETS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_CHESTS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_LEGGINGS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_BOOTS;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_EFFECTS;
 
     private static Set<String> excludedBuildings = null;
-    private static List<Pair<Float, String>> randomMobs = null;
-    private static List<Pair<Float, String>> randomWeapons = null;
-    private static List<Pair<Float, String>> randomHelmets = null;
-    private static List<Pair<Float, String>> randomChests = null;
-    private static List<Pair<Float, String>> randomLeggings = null;
-    private static List<Pair<Float, String>> randomBoots = null;
-    private static List<Pair<Float, String>> randomEffects = null;
+    private static MobSettings defaultSettings = null;
+    private static MobSettings defaultSphereSettings = null;
 
     private static final ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
 
@@ -165,12 +161,21 @@ public class Config {
         HAUNTED_CHANCE = SERVER_BUILDER
                 .comment("The chance that a building is haunted")
                 .defineInRange("hauntedChance", 0.8f, 0, 1);
+        HAUNTED_CHANCE_MULTIPLIER = SERVER_BUILDER
+                .comment("Makes 'hauntedChance' relative to the number of chunks in a multibuilding. 0 means that it is the same. 1 means that it multiplies by the number of chunks in the building")
+                .defineInRange("hauntedChanceMultiplier", 0.3f, 0, 100);
         MIN_MOBS = SERVER_BUILDER
                 .comment("The minimum amount of mobs that are spawned by a haunted building")
                 .defineInRange("minMobs", 10, 1, 10000);
+        MIN_MOBS_MULTIPLIER = SERVER_BUILDER
+                .comment("Makes 'minMobs' relative to the number of chunks in a multibuilding. 0 means that it is the same. 1 means that it multiplies by the number of chunks in the building")
+                .defineInRange("minMobsMultiplier", 0.3f, 0, 100);
         MAX_MOBS = SERVER_BUILDER
                 .comment("The maximum amount of mobs that are spawned by a haunted building")
                 .defineInRange("maxMobs", 50, 1, 10000);
+        MAX_MOBS_MULTIPLIER = SERVER_BUILDER
+                .comment("Makes 'maxMobs' relative to the number of chunks in a multibuilding. 0 means that it is the same. 1 means that it multiplies by the number of chunks in the building")
+                .defineInRange("maxMobsMultiplier", 0.3f, 0, 100);
         SPHERE_HAUNTED_CHANCE = SERVER_BUILDER
                 .comment("The chance that a building is haunted. This version is used in case the building is in a Lost City sphere")
                 .defineInRange("sphereHauntedChance", 0.8f, 0, 1);
@@ -217,71 +222,97 @@ public class Config {
         return excludedBuildings;
     }
 
-    public static List<Pair<Float, String>> getRandomMobs() {
-        if (randomMobs == null) {
-            randomMobs = new ArrayList<>();
-            makeList(randomMobs, MOBS.get());
-        }
-        return randomMobs;
-    }
-
-    public static List<Pair<Float, String>> getRandomWeapons() {
-        if (randomWeapons == null) {
-            randomWeapons = new ArrayList<>();
-            makeList(randomWeapons, RANDOM_WEAPONS.get());
-        }
-        return randomWeapons;
-    }
-
-    public static List<Pair<Float, String>> getRandomHelmets() {
-        if (randomHelmets == null) {
-            randomHelmets = new ArrayList<>();
-            makeList(randomHelmets, RANDOM_HELMETS.get());
-        }
-        return randomHelmets;
-    }
-
-    public static List<Pair<Float, String>> getRandomChests() {
-        if (randomChests == null) {
-            randomChests = new ArrayList<>();
-            makeList(randomChests, RANDOM_CHESTS.get());
-        }
-        return randomChests;
-    }
-
-    public static List<Pair<Float, String>> getRandomLeggings() {
-        if (randomLeggings == null) {
-            randomLeggings = new ArrayList<>();
-            makeList(randomLeggings, RANDOM_LEGGINGS.get());
-        }
-        return randomLeggings;
-    }
-
-    public static List<Pair<Float, String>> getRandomBoots() {
-        if (randomBoots == null) {
-            randomBoots = new ArrayList<>();
-            makeList(randomBoots, RANDOM_BOOTS.get());
-        }
-        return randomBoots;
-    }
-
-    public static List<Pair<Float, String>> getRandomEffects() {
-        if (randomEffects == null) {
-            randomEffects = new ArrayList<>();
-            makeList(randomEffects, RANDOM_EFFECTS.get());
-        }
-        return randomEffects;
-    }
-
-    private static void makeList(List<Pair<Float, String>> list, List<? extends String> elements) {
+    private static List<MobSettings.RL> makeRlList(List<? extends String> elements) {
+        var list = new ArrayList<MobSettings.RL>();
         for (String s : elements) {
             String[] split = StringUtils.split(s, '=');
             try {
                 float factor = Float.parseFloat(split[0]);
-                list.add(Pair.of(factor, split[1]));
+                list.add(new MobSettings.RL(new ResourceLocation(split[1]), factor));
             } catch (NumberFormatException e) {
                 throw new RuntimeException("Bad random factor in 'mobs' setting for Lost Souls configuration!");
             }
         }
+        return list;
+    }
+
+    private static List<MobSettings.Effect> makeEffectList(List<? extends String> elements) {
+        var list = new ArrayList<MobSettings.Effect>();
+        for (String s : elements) {
+            //	Format = .2=minecraft:regeneration,3 (so factor=name,level)
+            String[] split = StringUtils.split(s, '=');
+            try {
+                float factor = Float.parseFloat(split[0]);
+                String[] split2 = StringUtils.split(split[1], ',');
+                list.add(new MobSettings.Effect(new ResourceLocation(split2[0]), Integer.parseInt(split2[1]), factor));
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Bad random factor in 'effects' setting for Lost Souls configuration!");
+            }
+        }
+        return list;
+    }
+
+    public static MobSettings getDefaultSettings() {
+        if (defaultSettings == null) {
+            defaultSettings = new MobSettings(
+                    Collections.emptyList(),
+                    Collections.emptyList(),
+                    Optional.of(makeRlList(Config.MOBS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_WEAPONS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_HELMETS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_CHESTS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_LEGGINGS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_BOOTS.get())),
+                    Optional.of(makeEffectList(Config.RANDOM_EFFECTS.get())),
+                    Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
+                    Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
+                    Optional.of(new MobSettings.Range<>(Config.MIN_MOBS.get(), Config.MAX_MOBS.get())),
+                    Optional.of(Config.HAUNTED_CHANCE.get())
+            );
+        }
+        return defaultSettings;
+    }
+
+    public static MobSettings getDefaultSphereSettings() {
+        if (defaultSphereSettings == null) {
+            defaultSphereSettings = new MobSettings(
+                    Collections.emptyList(),
+                    Collections.emptyList(),
+                    Optional.of(makeRlList(Config.MOBS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_WEAPONS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_HELMETS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_CHESTS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_LEGGINGS.get())),
+                    Optional.of(makeRlList(Config.RANDOM_BOOTS.get())),
+                    Optional.of(makeEffectList(Config.RANDOM_EFFECTS.get())),
+                    Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
+                    Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
+                    Optional.of(new MobSettings.Range<>(Config.SPHERE_MIN_MOBS.get(), Config.SPHERE_MAX_MOBS.get())),
+                    Optional.of(Config.SPHERE_HAUNTED_CHANCE.get())
+            );
+        }
+        return defaultSphereSettings;
+    }
+
+    public static MobSettings getDefaultMultiSettings(float chunks) {
+        double hauntedChance = Config.HAUNTED_CHANCE.get() * (1 + (chunks-1) * Config.HAUNTED_CHANCE_MULTIPLIER.get());
+        int minMobs = (int) (Config.MIN_MOBS.get() * (1 + (chunks-1) * Config.MIN_MOBS_MULTIPLIER.get()));
+        int maxMobs = (int) (Config.MAX_MOBS.get() * (1 + (chunks-1) * Config.MAX_MOBS_MULTIPLIER.get()));
+
+        return new MobSettings(
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Optional.of(makeRlList(Config.MOBS.get())),
+                Optional.of(makeRlList(Config.RANDOM_WEAPONS.get())),
+                Optional.of(makeRlList(Config.RANDOM_HELMETS.get())),
+                Optional.of(makeRlList(Config.RANDOM_CHESTS.get())),
+                Optional.of(makeRlList(Config.RANDOM_LEGGINGS.get())),
+                Optional.of(makeRlList(Config.RANDOM_BOOTS.get())),
+                Optional.of(makeEffectList(Config.RANDOM_EFFECTS.get())),
+                Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
+                Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
+                Optional.of(new MobSettings.Range<>(minMobs, maxMobs)),
+                Optional.of(hauntedChance)
+        );
     }
 }

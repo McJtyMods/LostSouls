@@ -1,9 +1,10 @@
 package mcjty.lostsouls.data;
 
-import mcjty.lostcities.varia.ChunkCoord;
+import mcjty.lostsouls.varia.ChunkCoord;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 
+import javax.annotation.Nullable;
 import java.util.Random;
 
 public class LostChunkData {
@@ -14,18 +15,33 @@ public class LostChunkData {
     private int enteredCount;   // Count the number of times a player has entered this building
     private long messagetime;
 
+    // This is not persisted but calculated on demand. It's a cached value
+    private MobSettings settings;
+
     public LostChunkData() {
         numberKilled = 0;
         enteredCount = 0;
         messagetime = -1;
     }
 
-    public void initialize(ServerLevel level, ChunkCoord cc, double hauntedChance, int minMobs, int maxMobs) {
+    // The settings given here should be a combination of the global settings and the building settings
+    public void initialize(ServerLevel level, ChunkCoord cc, MobSettings settings) {
         Random random = new Random(level.getSeed()*899812591L + cc.chunkX()*916023653L + cc.chunkZ()*797003437L);
         random.nextFloat();
         random.nextFloat();
-        haunted = random.nextFloat() < hauntedChance;
-        totalMobs = random.nextInt(maxMobs - minMobs+1) + minMobs;
+        haunted = random.nextFloat() < settings.getHauntedChance();
+        MobSettings.Range<Integer> amounts = settings.getMobAmounts();
+        totalMobs = random.nextInt(amounts.max() - amounts.min()+1) + amounts.min();
+        this.settings = settings;
+    }
+
+    @Nullable
+    public MobSettings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(MobSettings settings) {
+        this.settings = settings;
     }
 
     public boolean isHaunted() {

@@ -5,6 +5,7 @@ import mcjty.lostcities.api.ILostCityInformation;
 import mcjty.lostsouls.commands.ModCommands;
 import mcjty.lostsouls.data.LostChunkData;
 import mcjty.lostsouls.data.LostSoulData;
+import mcjty.lostsouls.data.MobSettings;
 import mcjty.lostsouls.setup.Config;
 import mcjty.lostsouls.setup.ModSetup;
 import mcjty.lostsouls.varia.ChunkCoord;
@@ -41,7 +42,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 import java.util.List;
@@ -148,11 +148,17 @@ public class ForgeEventHandlers {
         String buildingType = chunkInfo.getBuildingType();
         if (buildingType != null) {
             // We have a building
-            Level world = player.getLevel();
+            ServerLevel world = player.getLevel();
             RandomSource rand = world.getRandom();
             long gameTime = world.getGameTime();
             LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, lost);
             if (isHaunted(data, buildingType)) {
+                MobSettings settings = data.getSettings();
+                if (settings == null) {
+                    LostSoulData ld = LostSoulData.getData(world);
+                    settings = ld.getSettingsForChunk(world, new ChunkCoord(world.dimension(), chunkX, chunkZ), lost);
+                    data.setSettings(settings);
+                }
                 if (entered) {
                     data.enterBuilding();
                     LostSoulData.getData(world).setDirty();
@@ -207,8 +213,8 @@ public class ForgeEventHandlers {
                     if (allowSpawn && world.getBlockState(new BlockPos(x, y, z)).isAir()) {
                         double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
                         if (distance >= Config.MIN_SPAWN_DISTANCE.get()) {
-                            String mob = Tools.getRandomFromList(rand, Config.getRandomMobs());
-                            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(mob));
+                            ResourceLocation mob = Tools.getRandomFromList(rand, settings.getMobs());
+                            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(mob);
                             if (type == null) {
                                 throw new RuntimeException("Unknown entity '" + mob + "'!");
                             }
@@ -219,7 +225,7 @@ public class ForgeEventHandlers {
                                 entity.setXRot(rand.nextFloat() * 360.0F);
                                 if (entity instanceof Mob mobEntity) {
                                     if (!Config.CHECK_VALID_SPAWN.get() || (mobEntity.checkSpawnObstruction(world))) {
-                                        boostEntity(world, (LivingEntity) entity);
+                                        boostEntity(settings, world, (LivingEntity) entity);
 
                                         entity.addTag("_ls_/" + world.dimension().location().toString() + "/" + chunkX + "/" + chunkZ);
                                         world.addFreshEntity(entity);
@@ -267,7 +273,7 @@ public class ForgeEventHandlers {
         }
     }
 
-    private void boostEntity(Level world, LivingEntity entity) {
+    private void boostEntity(MobSettings settings, Level world, LivingEntity entity) {
         AttributeInstance entityAttribute = entity.getAttribute(Attributes.MAX_HEALTH);
         RandomSource rand = world.getRandom();
         if (entityAttribute != null) {
@@ -283,50 +289,49 @@ public class ForgeEventHandlers {
             entityAttribute.setBaseValue(newMax);
         }
 
-        for (Pair<Float, String> pair : Config.getRandomEffects()) {
-            if (rand.nextFloat() < pair.getLeft()) {
-                String s = pair.getRight();
-                String[] split = StringUtils.split(s, ',');
-                MobEffect value = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(split[0]));
+        for (MobSettings.Effect pair : settings.getEffects()) {
+            if (rand.nextFloat() < pair.weight()) {
+                ResourceLocation effect = pair.name();
+                MobEffect value = ForgeRegistries.MOB_EFFECTS.getValue(effect);
                 if (value == null) {
-                    throw new RuntimeException("Cannot find potion effect '" + split[0] + "'!");
+                    throw new RuntimeException("Cannot find potion effect '" + effect + "'!");
                 }
-                int amplitude = Integer.parseInt(split[1]);
+                int amplitude = pair.level();
                 entity.addEffect(new MobEffectInstance(value, 10000, amplitude));
             }
         }
 
-        String weapon = Tools.getRandomFromList(rand, Config.getRandomWeapons());
-        if (!"null".equals(weapon)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(weapon));
+        ResourceLocation weapon = Tools.getRandomFromList(rand, settings.getWeapons());
+        if (weapon != null) {
+            Item item = ForgeRegistries.ITEMS.getValue(weapon);
             if (item != null) {
                 entity.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
             }
         }
-        String helmet = Tools.getRandomFromList(rand, Config.getRandomHelmets());
-        if (!"null".equals(helmet)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(helmet));
+        ResourceLocation helmet = Tools.getRandomFromList(rand, settings.getHelmets());
+        if (helmet != null) {
+            Item item = ForgeRegistries.ITEMS.getValue(helmet);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(item));
             }
         }
-        String chestplate = Tools.getRandomFromList(rand, Config.getRandomChests());
-        if (!"null".equals(chestplate)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(chestplate));
+        ResourceLocation chestplate = Tools.getRandomFromList(rand, settings.getChestplates());
+        if (chestplate != null) {
+            Item item = ForgeRegistries.ITEMS.getValue(chestplate);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(item));
             }
         }
-        String leggings = Tools.getRandomFromList(rand, Config.getRandomLeggings());
-        if (!"null".equals(leggings)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(leggings));
+        ResourceLocation leggings = Tools.getRandomFromList(rand, settings.getLeggings());
+        if (leggings != null) {
+            Item item = ForgeRegistries.ITEMS.getValue(leggings);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.LEGS, new ItemStack(item));
             }
         }
-        String boots = Tools.getRandomFromList(rand, Config.getRandomBoots());
-        if (!"null".equals(boots)) {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(boots));
+        ResourceLocation boots = Tools.getRandomFromList(rand, settings.getBoots());
+        if (boots != null) {
+            Item item = ForgeRegistries.ITEMS.getValue(boots);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.FEET, new ItemStack(item));
             }

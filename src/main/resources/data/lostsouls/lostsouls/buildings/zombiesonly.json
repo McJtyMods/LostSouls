@@ -1,0 +1,39 @@
+{
+  "buildings": [ "lostcities:building1", "lostcities:building2", "lostcities:building3" ],
+  "multibuildings": [],
+  "mobs": [
+    {
+      "name": "minecraft:zombie",
+      "weight": 1
+    }
+  ],
+  "helmets": [
+    {
+      "name": "minecraft:iron_helmet",
+      "weight": 1
+    }
+  ],
+  "chestplates": [
+    {
+      "name": "minecraft:iron_chestplate",
+      "weight": 1
+    }
+  ],
+  "leggings": [
+    {
+      "name": "minecraft:iron_leggings",
+      "weight": 1
+    }
+  ],
+  "boots": [
+    {
+      "name": "minecraft:iron_boots",
+      "weight": 1
+    }
+  ],
+  "healthbonus": {
+    "min": 2,
+    "max": 3
+  },
+  "hauntedchance": 0.6
+}
