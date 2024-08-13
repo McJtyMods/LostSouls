@@ -147,40 +147,17 @@ public class ForgeEventHandlers {
             long gameTime = world.getGameTime();
             LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, lost);
             if (isHaunted(data, buildingType)) {
+                LostSoulData ld = LostSoulData.getData(world);
                 MobSettings settings = data.getSettings();
                 if (settings == null) {
-                    LostSoulData ld = LostSoulData.getData(world);
                     settings = ld.getSettingsForChunk(world, new ChunkCoord(world.dimension(), chunkX, chunkZ), lost);
                     data.setSettings(settings);
                 }
                 if (entered) {
                     data.enterBuilding();
-                    LostSoulData.getData(world).setDirty();
-                    int enteredCount = data.getEnteredCount();
-                    if (Config.ANNOUNCE_ENTER.get()) {
-                        long lastMessagetime = data.getMessagetime();
-                        if (enteredCount == 1) {
-                            // First time
-                            MutableComponent firstMessage = Component.translatable(Config.MESSAGE_BUILDING_HAUNTED.get());
-                            player.sendSystemMessage(firstMessage);
-                        } else if (lastMessagetime + Config.MESSAGE_INTERVAL.get() < gameTime) {
-                            String msg = Config.MESSAGE_BUILDING_HAUNTED_REPEAT.get();
-                            if ("<same>".equals(msg)) {
-                                msg = Config.MESSAGE_BUILDING_HAUNTED.get();
-                            }
-                            MutableComponent message = Component.translatable(msg);
-                            player.sendSystemMessage(message);
-                        }
-                        data.setMessagetime(gameTime);
-                    }
-                    if (enteredCount == 1) {
-                        executeCommands(player, world, Config.COMMAND_FIRSTTIME.get());
-                    }
-                    if (enteredCount >= 1) {
-                        executeCommands(player, world, Config.COMMAND_ENTERED.get());
-                    }
+                    ld.setDirty();
+                    enterBuilding(player, data, gameTime, world);
                 }
-
 
                 int realHeight = lost.getRealHeight(chunkInfo.getCityLevel());
 
@@ -189,7 +166,6 @@ public class ForgeEventHandlers {
                 int maxy = realHeight + (chunkInfo.getNumFloors() + 1) * 6;
 
                 if (position.getY() >= miny && position.getY() <= maxy) {
-
                     double x = chunkX * 16 + rand.nextDouble() * 16.0;
                     double y = (position.getY() + rand.nextInt(3) - 1);
                     double z = chunkZ * 16 + rand.nextDouble() * 16.0;
@@ -207,29 +183,59 @@ public class ForgeEventHandlers {
                     if (allowSpawn && world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
                         double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
                         if (distance >= Config.MIN_SPAWN_DISTANCE.get()) {
-                            ResourceLocation mob = Tools.getRandomFromList(rand, settings.getMobs());
-                            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(mob);
-                            if (type == null) {
-                                throw new RuntimeException("Unknown entity '" + mob + "'!");
-                            }
-                            Entity entity = type.create(world);
-                            int cnt = world.getEntities(entity, (new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(8.0))).size();
-                            if (cnt <= Config.SPAWN_MAX_NEARBY.get()) {
-                                entity.setPos(x, y, z);
-                                entity.setXRot(rand.nextFloat() * 360.0F);
-                                if (entity instanceof Mob mobEntity) {
-                                    if (!Config.CHECK_VALID_SPAWN.get() || (mobEntity.checkSpawnObstruction(world))) {
-                                        boostEntity(settings, world, (LivingEntity) entity);
-
-                                        entity.addTag("_ls_/" + world.dimension().location().toString() + "/" + chunkX + "/" + chunkZ);
-                                        world.addFreshEntity(entity);
-                                    }
-                                }
-                            }
+                            spawnMob(rand, settings, world, x, y, z, chunkX, chunkZ);
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void spawnMob(RandomSource rand, MobSettings settings, ServerLevel world, double x, double y, double z, int chunkX, int chunkZ) {
+        ResourceLocation mob = Tools.getRandomFromList(rand, settings.getMobs());
+        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(mob);
+        if (type == null) {
+            throw new RuntimeException("Unknown entity '" + mob + "'!");
+        }
+        Entity entity = type.create(world);
+        int cnt = world.getEntities(entity, (new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(8.0))).size();
+        if (cnt <= Config.SPAWN_MAX_NEARBY.get()) {
+            entity.setPos(x, y, z);
+            entity.setXRot(rand.nextFloat() * 360.0F);
+            if (entity instanceof Mob mobEntity) {
+                if (!Config.CHECK_VALID_SPAWN.get() || (mobEntity.checkSpawnObstruction(world))) {
+                    boostEntity(settings, world, (LivingEntity) entity);
+
+                    entity.addTag("_ls_/" + world.dimension().location() + "/" + chunkX + "/" + chunkZ);
+                    world.addFreshEntity(entity);
+                }
+            }
+        }
+    }
+
+    private void enterBuilding(ServerPlayer player, LostChunkData data, long gameTime, ServerLevel world) {
+        int enteredCount = data.getEnteredCount();
+        if (Config.ANNOUNCE_ENTER.get()) {
+            long lastMessagetime = data.getMessagetime();
+            if (enteredCount == 1) {
+                // First time
+                MutableComponent firstMessage = Component.translatable(Config.MESSAGE_BUILDING_HAUNTED.get());
+                player.sendSystemMessage(firstMessage);
+            } else if (lastMessagetime + Config.MESSAGE_INTERVAL.get() < gameTime) {
+                String msg = Config.MESSAGE_BUILDING_HAUNTED_REPEAT.get();
+                if ("<same>".equals(msg)) {
+                    msg = Config.MESSAGE_BUILDING_HAUNTED.get();
+                }
+                MutableComponent message = Component.translatable(msg);
+                player.sendSystemMessage(message);
+            }
+            data.setMessagetime(gameTime);
+        }
+        if (enteredCount == 1) {
+            executeCommands(player, world, Config.COMMAND_FIRSTTIME.get());
+        }
+        if (enteredCount >= 1) {
+            executeCommands(player, world, Config.COMMAND_ENTERED.get());
         }
     }
 
