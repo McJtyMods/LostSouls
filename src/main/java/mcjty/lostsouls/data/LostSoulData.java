@@ -113,6 +113,28 @@ public class LostSoulData extends SavedData {
     }
 
     private LostChunkData getSoulData(ServerLevel world, ChunkCoord cc, @Nullable ILostCityInformation lost) {
+        // Multichunk building check
+
+        if (lost != null) {
+            ILostChunkInfo chunkInfo = lost.getChunkInfo(cc.chunkX(), cc.chunkZ());
+            ILostChunkInfo.MultiBuildingInfo mb = chunkInfo.getMultiBuildingInfo();
+            if (mb != null) {
+                LostChunkData data = new LostChunkData();
+                ChunkCoord topleft = cc.offset(-mb.offsetX(), -mb.offsetZ());
+                if (!lostChunkDataMap.containsKey(topleft)) {
+                    MobSettings settings = getSettingsForChunk(world, topleft, lost);
+                    data.initialize(world, topleft, settings);
+                    lostChunkDataMap.put(topleft, data);
+                    setDirty();
+                    return lostChunkDataMap.get(topleft);
+                }
+                else {
+                    return lostChunkDataMap.get(topleft);
+                }
+            }
+        }
+
+        // Single chunk building check
         if (!lostChunkDataMap.containsKey(cc)) {
             LostChunkData data = new LostChunkData();
             if (lost == null) {
@@ -121,18 +143,7 @@ public class LostSoulData extends SavedData {
             } else {
                 MobSettings settings = getSettingsForChunk(world, cc, lost);
                 data.initialize(world, cc, settings);
-                ILostChunkInfo chunkInfo = lost.getChunkInfo(cc.chunkX(), cc.chunkZ());
-                ILostChunkInfo.MultiBuildingInfo mb = chunkInfo.getMultiBuildingInfo();
-                if (mb != null) {
-                    ChunkCoord topleft = cc.offset(-mb.offsetX(), -mb.offsetZ());
-                    for (int x = 0; x < mb.w(); x++) {
-                        for (int z = 0; z < mb.h(); z++) {
-                            lostChunkDataMap.put(topleft.offset(x, z), data);
-                        }
-                    }
-                } else {
-                    lostChunkDataMap.put(cc, data);
-                }
+                lostChunkDataMap.put(cc, data);
             }
             setDirty();
         }

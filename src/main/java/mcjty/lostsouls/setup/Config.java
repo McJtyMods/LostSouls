@@ -34,6 +34,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
     public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
     public static ForgeConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
+    public static ForgeConfigSpec.DoubleValue MAX_SPAWN_DISTANCE;// = 16.0f;
     public static ForgeConfigSpec.DoubleValue HAUNTED_CHANCE;// = 0.8f;
     public static ForgeConfigSpec.DoubleValue HAUNTED_CHANCE_MULTIPLIER;
     public static ForgeConfigSpec.IntValue MIN_MOBS;// = 10;
@@ -144,7 +145,10 @@ public class Config {
                 .defineInRange("spawnMaxNearby", 6, 1, 200);
         MIN_SPAWN_DISTANCE = SERVER_BUILDER
                 .comment("The minimum distance between the player and newly spawned mobs")
-                .defineInRange("minSpawnDistance", 8.0f, 0, 16);
+                .defineInRange("minSpawnDistance", 8.0f, 0, 128);
+        MAX_SPAWN_DISTANCE = SERVER_BUILDER
+                .comment("The maximum distance between the player and newly spawned mobs")
+                .defineInRange("maxSpawnDistance", 16.0f, 0, 128);
         MIN_HEALTH_BONUS = SERVER_BUILDER
                 .comment("The minimum health bonus that the mob will get")
                 .defineInRange("minHealthBonus", 2f, 0.01f, 10000);
@@ -302,16 +306,16 @@ public class Config {
         return new MobSettings(
                 Collections.emptyList(),
                 Collections.emptyList(),
-                Optional.of(makeRlList(Config.MOBS.get())),
-                Optional.of(makeRlList(Config.RANDOM_WEAPONS.get())),
-                Optional.of(makeRlList(Config.RANDOM_HELMETS.get())),
-                Optional.of(makeRlList(Config.RANDOM_CHESTS.get())),
-                Optional.of(makeRlList(Config.RANDOM_LEGGINGS.get())),
-                Optional.of(makeRlList(Config.RANDOM_BOOTS.get())),
-                Optional.of(makeEffectList(Config.RANDOM_EFFECTS.get())),
-                Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
-                Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
-                Optional.of(new MobSettings.Range<>(minMobs, maxMobs)),
+                        Optional.of(makeRlList(Config.MOBS.get())),
+                        Optional.of(makeRlList(Config.RANDOM_WEAPONS.get())),
+                        Optional.of(makeRlList(Config.RANDOM_HELMETS.get())),
+                        Optional.of(makeRlList(Config.RANDOM_CHESTS.get())),
+                        Optional.of(makeRlList(Config.RANDOM_LEGGINGS.get())),
+                        Optional.of(makeRlList(Config.RANDOM_BOOTS.get())),
+                        Optional.of(makeEffectList(Config.RANDOM_EFFECTS.get())),
+                        Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
+                        Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
+                        Optional.of(new MobSettings.Range<>(minMobs, maxMobs)),
                 Optional.of(hauntedChance)
         );
     }

@@ -77,7 +77,7 @@ public class ForgeEventHandlers {
                     if (isHaunted(data, buildingType)) {
                         event.setCanceled(true);
                         if (Config.ANNOUNCE_CHESTLOCKED.get()) {
-                            MutableComponent unsafeMessage = Component.translatable(Config.MESSAGE_BUILDING_HAUNTED.get());
+                            MutableComponent unsafeMessage = Component.translatable(Config.MESSAGE_UNSAFE_BUILDING.get());
                             event.getEntity().sendSystemMessage(unsafeMessage);
                         }
                     }
@@ -158,6 +158,14 @@ public class ForgeEventHandlers {
                     ld.setDirty();
                     enterBuilding(player, data, gameTime, world);
                 }
+                // If it's a multibuilding, we can try to randomize between the multichunks instead of fixated on single chunk.
+                ILostChunkInfo.MultiBuildingInfo mb = chunkInfo.getMultiBuildingInfo();
+                if (mb != null) {
+                    int rootX = chunkX - mb.offsetX();
+                    int rootZ = chunkZ - mb.offsetZ();
+                    chunkX = rootX + rand.nextInt(0, mb.w());
+                    chunkZ = rootZ + rand.nextInt(0, mb.h());
+                }
 
                 int realHeight = lost.getRealHeight(chunkInfo.getCityLevel());
 
@@ -182,7 +190,7 @@ public class ForgeEventHandlers {
                     }
                     if (allowSpawn && world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
                         double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
-                        if (distance >= Config.MIN_SPAWN_DISTANCE.get()) {
+                        if (distance >= Config.MIN_SPAWN_DISTANCE.get() && distance <= Config.MAX_SPAWN_DISTANCE.get()) {
                             spawnMob(rand, settings, world, x, y, z, chunkX, chunkZ);
                         }
                     }
@@ -350,8 +358,10 @@ public class ForgeEventHandlers {
 //                        String dim = split[1];
                         int x = Integer.parseInt(split[split.length - 2]);
                         int z = Integer.parseInt(split[split.length - 1]);
-                        // Should be in the cache, so we don't need a provider
-                        LostChunkData data = LostSoulData.getSoulData(event.getEntity().level(), x, z, null);
+
+                        ILostCityInformation info = ModSetup.lostCities.getLostInfo(player.level());
+                        LostChunkData data = LostSoulData.getSoulData(event.getEntity().level(), x, z, info);
+
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED.get()) {
                             if (data.getNumberKilled() == data.getTotalMobs()) {
