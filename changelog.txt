@@ -1,3 +1,10 @@
+1.20-4.1.1:
+- TqLxQuanZ did the following changes:
+    - Added config for max spawn distance.
+    - Added support for multibuilding spawn distance randomization (No longer keep within a single chunk).
+    - Added support for multibuilding killing total count.
+    - Fixed the unsafe building message is not used when trying to open chest.
+
 1.20-4.1.0:
 - Lost Souls now properly supports multi buildings and sees them as a single building
 - New config options to modify the difficulty for a multi building
