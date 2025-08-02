@@ -146,7 +146,16 @@ public class ForgeEventHandlers {
             RandomSource rand = world.getRandom();
             long gameTime = world.getGameTime();
             LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, lost);
+
             if (isHaunted(data, buildingType)) {
+                // Restrict spawning to roughly the dimensions of the building
+                int realHeight = lost.getRealHeight(chunkInfo.getCityLevel());
+
+                int miny = realHeight - (chunkInfo.getNumCellars() + 1) * 6;
+                int maxy = realHeight + (chunkInfo.getNumFloors() + 1) * 6;
+
+                if (!(position.getY() >= miny && position.getY() <= maxy)) return;
+
                 LostSoulData ld = LostSoulData.getData(world);
                 MobSettings settings = data.getSettings();
                 if (settings == null) {
@@ -160,54 +169,61 @@ public class ForgeEventHandlers {
                 }
                 // If it's a multibuilding, we can try to randomize between the multichunks instead of fixated on single chunk.
                 ILostChunkInfo.MultiBuildingInfo mb = chunkInfo.getMultiBuildingInfo();
+                int rootX = chunkX;
+                int rootZ = chunkZ;
+                int maxChunkX = chunkX;
+                int maxChunkZ = chunkZ;
                 if (mb != null) {
-                    int rootX = chunkX - mb.offsetX();
-                    int rootZ = chunkZ - mb.offsetZ();
+                    rootX = chunkX - mb.offsetX();
+                    rootZ = chunkZ - mb.offsetZ();
                     chunkX = rootX + rand.nextInt(0, mb.w());
                     chunkZ = rootZ + rand.nextInt(0, mb.h());
+                    maxChunkX = rootX + mb.w();
+                    maxChunkZ = rootZ + mb.h();
                 }
 
-                int realHeight = lost.getRealHeight(chunkInfo.getCityLevel());
+                double x = chunkX * 16 + Math.floor(rand.nextDouble() * 16.0) + 0.5;
+                double y = (position.getY() + rand.nextInt(3) - 1);
+                double z = chunkZ * 16 + Math.floor(rand.nextDouble() * 16.0) + 0.5;
 
-                // Restrict spawning to roughly the dimensions of the building
-                int miny = realHeight - (chunkInfo.getNumCellars() + 1) * 6;
-                int maxy = realHeight + (chunkInfo.getNumFloors() + 1) * 6;
-
-                if (position.getY() >= miny && position.getY() <= maxy) {
-                    double x = chunkX * 16 + rand.nextDouble() * 16.0;
-                    double y = (position.getY() + rand.nextInt(3) - 1);
-                    double z = chunkZ * 16 + rand.nextDouble() * 16.0;
-
-                    if (world.getBlockState(new BlockPos((int) x, (int) (y - 1), (int) z)).isAir()) {
-                        y--;
-                    }
-                    if (!world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
-                        y++;
-                    }
-                    boolean allowSpawn = true;
-                    if (Config.SPAWN_ON_BLOCK.get()) {
-                        allowSpawn = !world.getBlockState(new BlockPos((int) x, (int) (y - 1), (int) z)).isAir();
-                    }
-                    if (allowSpawn && world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
-                        double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
-                        if (distance >= Config.MIN_SPAWN_DISTANCE.get() && distance <= Config.MAX_SPAWN_DISTANCE.get()) {
-                            spawnMob(rand, settings, world, x, y, z, chunkX, chunkZ);
-                        }
+                if (world.getBlockState(new BlockPos((int) x, (int) (y - 1), (int) z)).isAir()) {
+                    y--;
+                }
+                if (!world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
+                    y++;
+                }
+                boolean allowSpawn = true;
+                if (Config.SPAWN_ON_BLOCK.get()) {
+                    allowSpawn = !world.getBlockState(new BlockPos((int) x, (int) (y - 1), (int) z)).isAir();
+                }
+                if (allowSpawn && world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
+                    double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
+                    if (distance >= Config.MIN_SPAWN_DISTANCE.get() && distance <= Config.MAX_SPAWN_DISTANCE.get()) {
+                        spawnMob(rand, settings, world, x, y, z, rootX, rootZ, maxChunkX, maxChunkZ, miny, maxy, data.getTotalMobs());
                     }
                 }
             }
         }
     }
 
-    private void spawnMob(RandomSource rand, MobSettings settings, ServerLevel world, double x, double y, double z, int chunkX, int chunkZ) {
+    private void spawnMob(RandomSource rand, MobSettings settings, ServerLevel world, double x, double y, double z, int chunkX, int chunkZ, int maxChunkX, int maxChunkZ, int minY, int maxY, int totalMobs) {
         ResourceLocation mob = Tools.getRandomFromList(rand, settings.getMobs());
         EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(mob);
         if (type == null) {
             throw new RuntimeException("Unknown entity '" + mob + "'!");
         }
         Entity entity = type.create(world);
-        int cnt = world.getEntities(entity, (new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(8.0))).size();
-        if (cnt <= Config.SPAWN_MAX_NEARBY.get()) {
+        int cnt = 0;
+        int maxEntities = 0;
+        if (Config.USE_CHUNK_CHECK.get()) {
+            maxEntities = totalMobs;
+            cnt = world.getEntities(entity, (new AABB(chunkX * 16, minY, chunkZ * 16, (maxChunkX * 16) + 16, maxY, (maxChunkZ * 16) + 16))).size();
+        }
+        else {
+            maxEntities = Config.SPAWN_MAX_NEARBY.get();
+            cnt = world.getEntities(entity, (new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(Config.SPAWN_MAX_NEARBY_RADIUS.get()))).size();
+        }
+        if (cnt <= maxEntities) {
             entity.setPos(x, y, z);
             entity.setXRot(rand.nextFloat() * 360.0F);
             if (entity instanceof Mob mobEntity) {
@@ -361,6 +377,12 @@ public class ForgeEventHandlers {
 
                         ILostCityInformation info = ModSetup.lostCities.getLostInfo(player.level());
                         LostChunkData data = LostSoulData.getSoulData(event.getEntity().level(), x, z, info);
+                        MobSettings settings = data.getSettings();
+                        if (settings != null) {
+                            LostSoulData ld = LostSoulData.getData(event.getEntity().level());
+                            settings = ld.getSettingsForChunk((ServerLevel)event.getEntity().level(), new ChunkCoord(event.getEntity().level().dimension(), x, z), info);
+                            data.setSettings(settings);
+                        }
 
                         data.newKill();
                         if (Config.ANNOUNCE_CLEARED.get()) {
