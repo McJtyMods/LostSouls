@@ -1,3 +1,9 @@
+1.20-4.1.3:
+- Fixed mob spawning using incorrect check to determine their total count.
+- Horde chunk check now tries to spawn the exact amount of the remaining mobs.
+- The mob effect now last infinitely instead if 8 minutes.
+
+
 1.20-4.1.2:
 - Added a new config USE_CHUNK_CHECK to make the horde building only spawns total amount of required mobs within the horde building radius, SPAWN_MAX_NEARBY will be disabled when this is used.
 - Added a new config SPAWN_MAX_NEARBY_RADIUS for tweaking the radius of checking the maximum amount zombies can spawn within an area.

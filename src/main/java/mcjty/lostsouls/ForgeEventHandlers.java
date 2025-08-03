@@ -199,7 +199,8 @@ public class ForgeEventHandlers {
                 if (allowSpawn && world.getBlockState(new BlockPos((int) x, (int) y, (int) z)).isAir()) {
                     double distance = Math.sqrt(position.distToCenterSqr((int) x, (int) y, (int) z));
                     if (distance >= Config.MIN_SPAWN_DISTANCE.get() && distance <= Config.MAX_SPAWN_DISTANCE.get()) {
-                        spawnMob(rand, settings, world, x, y, z, rootX, rootZ, maxChunkX, maxChunkZ, miny, maxy, data.getTotalMobs());
+                        int totalMobsToSpawn = data.getTotalMobs() - data.getNumberKilled();
+                        spawnMob(rand, settings, world, x, y, z, rootX, rootZ, maxChunkX, maxChunkZ, miny, maxy, totalMobsToSpawn);
                     }
                 }
             }
@@ -212,18 +213,26 @@ public class ForgeEventHandlers {
         if (type == null) {
             throw new RuntimeException("Unknown entity '" + mob + "'!");
         }
-        Entity entity = type.create(world);
         int cnt = 0;
         int maxEntities = 0;
         if (Config.USE_CHUNK_CHECK.get()) {
             maxEntities = totalMobs;
-            cnt = world.getEntities(entity, (new AABB(chunkX * 16, minY, chunkZ * 16, (maxChunkX * 16) + 16, maxY, (maxChunkZ * 16) + 16))).size();
+            List<Entity> entityList = world.getEntities(
+                    (Entity) null,
+                    new AABB(chunkX * 16, minY, chunkZ * 16, maxChunkX * 16, maxY, maxChunkZ * 16),
+                    entity -> entity.getTags().stream().anyMatch(tag -> tag.contains("_ls_/"))
+            );
+            cnt = entityList.size();
         }
         else {
             maxEntities = Config.SPAWN_MAX_NEARBY.get();
-            cnt = world.getEntities(entity, (new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(Config.SPAWN_MAX_NEARBY_RADIUS.get()))).size();
+            cnt = world.getEntities((Entity) null,
+                    new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(Config.SPAWN_MAX_NEARBY_RADIUS.get()),
+                    entity -> entity.getTags().stream().anyMatch(tag -> tag.contains("_ls_/"))
+            ).size();
         }
         if (cnt <= maxEntities) {
+            Entity entity = type.create(world);
             entity.setPos(x, y, z);
             entity.setXRot(rand.nextFloat() * 360.0F);
             if (entity instanceof Mob mobEntity) {
@@ -321,7 +330,7 @@ public class ForgeEventHandlers {
                     throw new RuntimeException("Cannot find potion effect '" + effect + "'!");
                 }
                 int amplitude = pair.level();
-                entity.addEffect(new MobEffectInstance(value, 10000, amplitude));
+                entity.addEffect(new MobEffectInstance(value, 1000000, amplitude));
             }
         }
 
