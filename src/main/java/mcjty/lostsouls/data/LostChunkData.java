@@ -31,7 +31,7 @@ public class LostChunkData {
         random.nextFloat();
         haunted = random.nextFloat() < settings.getHauntedChance();
         MobSettings.Range<Integer> amounts = settings.getMobAmounts();
-        totalMobs = random.nextInt(amounts.max() - amounts.min()+1) + amounts.min();
+        totalMobs = random.nextInt(amounts.min(), amounts.max());
         this.settings = settings;
     }
 
