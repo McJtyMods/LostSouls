@@ -29,8 +29,10 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -68,7 +70,7 @@ public class ForgeEventHandlers {
             if (info != null) {
                 BlockPos pos = event.getPos();
                 BlockEntity te = world.getBlockEntity(pos);
-                if ((Config.LOCK_ONLY_CHESTS.get() && te instanceof ChestBlockEntity) || ((!Config.LOCK_ONLY_CHESTS.get() && te != null))) {
+                if ((Config.LOCK_ONLY_CHESTS.get() && te instanceof RandomizableContainerBlockEntity) || ((!Config.LOCK_ONLY_CHESTS.get() && te != null))) {
                     int chunkX = pos.getX() >> 4;
                     int chunkZ = pos.getZ() >> 4;
                     LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, info);
@@ -240,6 +242,13 @@ public class ForgeEventHandlers {
                     boostEntity(settings, world, (LivingEntity) entity);
 
                     entity.addTag("_ls_/" + world.dimension().location() + "/" + chunkX + "/" + chunkZ);
+                    mobEntity.finalizeSpawn(
+                            world,
+                            world.getCurrentDifficultyAt(mobEntity.blockPosition()),
+                            MobSpawnType.MOB_SUMMONED, // or NATURAL, COMMAND, etc
+                            null,
+                            null
+                    );
                     world.addFreshEntity(entity);
                 }
             }
