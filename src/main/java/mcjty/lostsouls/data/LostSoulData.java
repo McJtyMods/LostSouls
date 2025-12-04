@@ -3,9 +3,9 @@ package mcjty.lostsouls.data;
 import mcjty.lostcities.api.ILostChunkInfo;
 import mcjty.lostcities.api.ILostCityInformation;
 import mcjty.lostcities.api.ILostSphere;
-import mcjty.lostsouls.LostSouls;
 import mcjty.lostsouls.setup.Config;
 import mcjty.lostsouls.varia.ChunkCoord;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -39,13 +39,13 @@ public class LostSoulData extends SavedData {
             throw new RuntimeException("Don't access this client-side!");
         }
         DimensionDataStorage storage = ((ServerLevel)world).getDataStorage();
-        return storage.computeIfAbsent(LostSoulData::new, LostSoulData::new, NAME);
+        return storage.computeIfAbsent(new Factory<LostSoulData>(LostSoulData::new, LostSoulData::new), NAME);
     }
 
     public LostSoulData() {
     }
 
-    public LostSoulData(CompoundTag tag) {
+    public LostSoulData(CompoundTag tag, HolderLookup.Provider provider) {
         load(tag);
     }
 
@@ -155,7 +155,7 @@ public class LostSoulData extends SavedData {
         ListTag list = nbt.getList("chunks", Tag.TAG_COMPOUND);
         for (Tag tag : list) {
             CompoundTag tc = (CompoundTag) tag;
-            ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(tc.getString("dim")));
+            ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(tc.getString("dim")));
             int x = tc.getInt("x");
             int z = tc.getInt("z");
             LostChunkData data = new LostChunkData();
@@ -165,7 +165,7 @@ public class LostSoulData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compound) {
+    public CompoundTag save(CompoundTag compound, HolderLookup.Provider provider) {
         ListTag list = new ListTag();
         for (Map.Entry<ChunkCoord, LostChunkData> entry : lostChunkDataMap.entrySet()) {
             CompoundTag tc = new CompoundTag();

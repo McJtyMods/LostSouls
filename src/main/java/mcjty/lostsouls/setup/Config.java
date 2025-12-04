@@ -3,7 +3,7 @@ package mcjty.lostsouls.setup;
 import com.google.common.collect.Lists;
 import mcjty.lostsouls.data.MobSettings;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -12,51 +12,51 @@ public class Config {
 
     public static final String CATEGORY_GENERAL = "general";
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_FIRSTTIME;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_ENTERED;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> COMMAND_CLEARED;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> COMMAND_FIRSTTIME;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> COMMAND_ENTERED;
+    public static ModConfigSpec.ConfigValue<List<? extends String>> COMMAND_CLEARED;
 
     private static String[] DEF_COMMAND_FIRSTTIME = new String[]{};
     private static String[] DEF_COMMAND_ENTERED = new String[]{};
     private static String[] DEF_COMMAND_CLEARED = new String[]{};
 
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED_REPEAT;
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
-    public static ForgeConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_UNSAFE_BUILDING;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HAUNTED_REPEAT;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_CLEARED;
+    public static ModConfigSpec.ConfigValue<String> MESSAGE_BUILDING_HALFWAY;
     private final static String DEF_MESSAGE_UNSAFE_BUILDING = "§eThe building isn't safe enough!";
     private final static String DEF_MESSAGE_BUILDING_HAUNTED = "§eThis building is haunted. Be careful!";
     private final static String DEF_MESSAGE_BUILDING_CLEARED = "§aThe building feels a lot safer now!";
     private final static String DEF_MESSAGE_BUILDING_HALFWAY = "§eAbout half way there! Keep going!";
 
-    public static ForgeConfigSpec.LongValue MESSAGE_INTERVAL;// = 12000; 10 minutes
-    public static ForgeConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
-    public static ForgeConfigSpec.BooleanValue USE_CHUNK_CHECK;// = false;
-    public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
-    public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY_RADIUS;// = 8;
-    public static ForgeConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
-    public static ForgeConfigSpec.DoubleValue MAX_SPAWN_DISTANCE;// = 16.0f;
-    public static ForgeConfigSpec.DoubleValue HAUNTED_CHANCE;// = 0.8f;
-    public static ForgeConfigSpec.DoubleValue HAUNTED_CHANCE_MULTIPLIER;
-    public static ForgeConfigSpec.IntValue MIN_MOBS;// = 10;
-    public static ForgeConfigSpec.DoubleValue MIN_MOBS_MULTIPLIER;
-    public static ForgeConfigSpec.IntValue MAX_MOBS;// = 50;
-    public static ForgeConfigSpec.DoubleValue MAX_MOBS_MULTIPLIER;
-    public static ForgeConfigSpec.DoubleValue SPHERE_HAUNTED_CHANCE;// = 0.8f;
-    public static ForgeConfigSpec.IntValue SPHERE_MIN_MOBS;// = 10;
-    public static ForgeConfigSpec.IntValue SPHERE_MAX_MOBS;// = 50;
-    public static ForgeConfigSpec.DoubleValue MIN_HEALTH_BONUS;// = 2f;
-    public static ForgeConfigSpec.DoubleValue MAX_HEALTH_BONUS;// = 5f;
-    public static ForgeConfigSpec.DoubleValue MIN_DAMAGE_BONUS;// = 2f;
-    public static ForgeConfigSpec.DoubleValue MAX_DAMAGE_BONUS;// = 5f;
-    public static ForgeConfigSpec.BooleanValue CHECK_VALID_SPAWN;// = false;
-    public static ForgeConfigSpec.BooleanValue SPAWN_ON_BLOCK;// = false;
-    public static ForgeConfigSpec.BooleanValue LOCK_CHESTS_UNTIL_CLEARED;// = true;
-    public static ForgeConfigSpec.BooleanValue LOCK_ONLY_CHESTS;// = true;
-    public static ForgeConfigSpec.BooleanValue ANNOUNCE_CLEARED;// = true;
-    public static ForgeConfigSpec.BooleanValue ANNOUNCE_ENTER;// = true;
-    public static ForgeConfigSpec.BooleanValue ANNOUNCE_CHESTLOCKED;// = true;
+    public static ModConfigSpec.LongValue MESSAGE_INTERVAL;// = 12000; 10 minutes
+    public static ModConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
+    public static ModConfigSpec.BooleanValue USE_CHUNK_CHECK;// = false;
+    public static ModConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
+    public static ModConfigSpec.IntValue SPAWN_MAX_NEARBY_RADIUS;// = 8;
+    public static ModConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
+    public static ModConfigSpec.DoubleValue MAX_SPAWN_DISTANCE;// = 16.0f;
+    public static ModConfigSpec.DoubleValue HAUNTED_CHANCE;// = 0.8f;
+    public static ModConfigSpec.DoubleValue HAUNTED_CHANCE_MULTIPLIER;
+    public static ModConfigSpec.IntValue MIN_MOBS;// = 10;
+    public static ModConfigSpec.DoubleValue MIN_MOBS_MULTIPLIER;
+    public static ModConfigSpec.IntValue MAX_MOBS;// = 50;
+    public static ModConfigSpec.DoubleValue MAX_MOBS_MULTIPLIER;
+    public static ModConfigSpec.DoubleValue SPHERE_HAUNTED_CHANCE;// = 0.8f;
+    public static ModConfigSpec.IntValue SPHERE_MIN_MOBS;// = 10;
+    public static ModConfigSpec.IntValue SPHERE_MAX_MOBS;// = 50;
+    public static ModConfigSpec.DoubleValue MIN_HEALTH_BONUS;// = 2f;
+    public static ModConfigSpec.DoubleValue MAX_HEALTH_BONUS;// = 5f;
+    public static ModConfigSpec.DoubleValue MIN_DAMAGE_BONUS;// = 2f;
+    public static ModConfigSpec.DoubleValue MAX_DAMAGE_BONUS;// = 5f;
+    public static ModConfigSpec.BooleanValue CHECK_VALID_SPAWN;// = false;
+    public static ModConfigSpec.BooleanValue SPAWN_ON_BLOCK;// = false;
+    public static ModConfigSpec.BooleanValue LOCK_CHESTS_UNTIL_CLEARED;// = true;
+    public static ModConfigSpec.BooleanValue LOCK_ONLY_CHESTS;// = true;
+    public static ModConfigSpec.BooleanValue ANNOUNCE_CLEARED;// = true;
+    public static ModConfigSpec.BooleanValue ANNOUNCE_ENTER;// = true;
+    public static ModConfigSpec.BooleanValue ANNOUNCE_CHESTLOCKED;// = true;
 
     private static String[] DEF_EXCLUDED_BUILDINGS = new String[]{};
     private static String[] DEF_MOBS = new String[]{".3=minecraft:zombie", ".3=minecraft:spider", ".3=minecraft:skeleton", ".2=minecraft:husk", ".2=minecraft:stray", ".1=minecraft:witch", ".1=minecraft:enderman"};
@@ -67,20 +67,20 @@ public class Config {
     private static String[] DEF_RANDOM_BOOTS = new String[]{".3=null", ".3=minecraft:diamond_boots", ".3=minecraft:iron_boots"};
     private static String[] DEF_RANDOM_EFFECTS = new String[]{".3=minecraft:regeneration,3", ".3=minecraft:speed,3", ".3=minecraft:fire_resistance,3"};
 
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_BUILDINGS;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> MOBS;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_WEAPONS;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_HELMETS;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_CHESTS;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_LEGGINGS;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_BOOTS;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_EFFECTS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_BUILDINGS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> MOBS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_WEAPONS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_HELMETS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_CHESTS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_LEGGINGS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_BOOTS;
+    private static ModConfigSpec.ConfigValue<List<? extends String>> RANDOM_EFFECTS;
 
     private static Set<String> excludedBuildings = null;
     private static MobSettings defaultSettings = null;
     private static MobSettings defaultSphereSettings = null;
 
-    private static final ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
+    private static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
 
     public static void register() {
         SERVER_BUILDER.comment("General settings").push(CATEGORY_GENERAL);
@@ -224,7 +224,7 @@ public class Config {
         SERVER_CONFIG = SERVER_BUILDER.build();
     }
 
-    public static ForgeConfigSpec SERVER_CONFIG;
+    public static ModConfigSpec SERVER_CONFIG;
 
     public static Set<String> getExcludedBuildings() {
         if (excludedBuildings == null) {
@@ -240,7 +240,7 @@ public class Config {
             String[] split = StringUtils.split(s, '=');
             try {
                 float factor = Float.parseFloat(split[0]);
-                list.add(new MobSettings.RL(new ResourceLocation(split[1]), factor));
+                list.add(new MobSettings.RL(ResourceLocation.parse(split[1]), factor));
             } catch (NumberFormatException e) {
                 throw new RuntimeException("Bad random factor in 'mobs' setting for Lost Souls configuration!");
             }
@@ -256,7 +256,7 @@ public class Config {
             try {
                 float factor = Float.parseFloat(split[0]);
                 String[] split2 = StringUtils.split(split[1], ',');
-                list.add(new MobSettings.Effect(new ResourceLocation(split2[0]), Integer.parseInt(split2[1]), factor));
+                list.add(new MobSettings.Effect(ResourceLocation.parse(split2[0]), Integer.parseInt(split2[1]), factor));
             } catch (NumberFormatException e) {
                 throw new RuntimeException("Bad random factor in 'effects' setting for Lost Souls configuration!");
             }

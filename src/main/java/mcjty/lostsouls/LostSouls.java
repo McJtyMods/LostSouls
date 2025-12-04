@@ -3,13 +3,13 @@ package mcjty.lostsouls;
 import mcjty.lostsouls.data.CustomRegistries;
 import mcjty.lostsouls.setup.Config;
 import mcjty.lostsouls.setup.ModSetup;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 
 @Mod(LostSouls.MODID)
 public class LostSouls {
@@ -20,13 +20,12 @@ public class LostSouls {
 
     public static LostSouls instance;
 
-    public LostSouls() {
+    public LostSouls(ModContainer mod, IEventBus bus, Dist dist) {
         instance = this;
         Config.register();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
-        CustomRegistries.init();
+        mod.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
+        CustomRegistries.init(bus);
 
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(setup::init);
         bus.addListener(CustomRegistries::onDataPackRegistry);
     }

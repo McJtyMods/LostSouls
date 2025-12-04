@@ -13,6 +13,8 @@ import mcjty.lostsouls.varia.Tools;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -29,26 +31,19 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ForgeEventHandlers {
 
@@ -63,7 +58,7 @@ public class ForgeEventHandlers {
     }
 
     @SubscribeEvent
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerInteract(PlayerInteractEvent.RightClickBlock event) {
         Level world = event.getLevel();
         if (Config.LOCK_CHESTS_UNTIL_CLEARED.get() && !world.isClientSide) {
             ILostCityInformation info = ModSetup.lostCities.getLostInfo(world);
@@ -89,14 +84,14 @@ public class ForgeEventHandlers {
     }
 
     @SubscribeEvent
-    public void onTickEvent(TickEvent.ServerTickEvent event) {
+    public void onTickEvent(ServerTickEvent.Post event) {
         timeout--;
         if (timeout > 0) {
             return;
         }
         timeout = Config.SERVERTICK_TIMEOUT.get();
 
-        PlayerList list = ServerLifecycleHooks.getCurrentServer().getPlayerList();
+        PlayerList list = event.getServer().getPlayerList();
         for (ServerPlayer player : list.getPlayers()) {
 
             UUID uuid = player.getUUID();
@@ -211,7 +206,7 @@ public class ForgeEventHandlers {
 
     private void spawnMob(RandomSource rand, MobSettings settings, ServerLevel world, double x, double y, double z, int chunkX, int chunkZ, int maxChunkX, int maxChunkZ, int minY, int maxY, int totalMobs) {
         ResourceLocation mob = Tools.getRandomFromList(rand, settings.getMobs());
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(mob);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(mob);
         if (type == null) {
             throw new RuntimeException("Unknown entity '" + mob + "'!");
         }
@@ -246,7 +241,6 @@ public class ForgeEventHandlers {
                             world,
                             world.getCurrentDifficultyAt(mobEntity.blockPosition()),
                             MobSpawnType.MOB_SUMMONED, // or NATURAL, COMMAND, etc
-                            null,
                             null
                     );
                     world.addFreshEntity(entity);
@@ -334,46 +328,46 @@ public class ForgeEventHandlers {
         for (MobSettings.Effect pair : settings.getEffects()) {
             if (rand.nextFloat() < pair.weight()) {
                 ResourceLocation effect = pair.name();
-                MobEffect value = ForgeRegistries.MOB_EFFECTS.getValue(effect);
-                if (value == null) {
+                Optional<Holder.Reference<MobEffect>> value = BuiltInRegistries.MOB_EFFECT.getHolder(effect);
+                if (value.isEmpty()) {
                     throw new RuntimeException("Cannot find potion effect '" + effect + "'!");
                 }
                 int amplitude = pair.level();
-                entity.addEffect(new MobEffectInstance(value, 1000000, amplitude));
+                entity.addEffect(new MobEffectInstance(value.get(), 1000000, amplitude));
             }
         }
 
         ResourceLocation weapon = Tools.getRandomFromList(rand, settings.getWeapons());
         if (weapon != null) {
-            Item item = ForgeRegistries.ITEMS.getValue(weapon);
+            Item item = BuiltInRegistries.ITEM.get(weapon);
             if (item != null) {
                 entity.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
             }
         }
         ResourceLocation helmet = Tools.getRandomFromList(rand, settings.getHelmets());
         if (helmet != null) {
-            Item item = ForgeRegistries.ITEMS.getValue(helmet);
+            Item item = BuiltInRegistries.ITEM.get(helmet);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(item));
             }
         }
         ResourceLocation chestplate = Tools.getRandomFromList(rand, settings.getChestplates());
         if (chestplate != null) {
-            Item item = ForgeRegistries.ITEMS.getValue(chestplate);
+            Item item = BuiltInRegistries.ITEM.get(chestplate);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(item));
             }
         }
         ResourceLocation leggings = Tools.getRandomFromList(rand, settings.getLeggings());
         if (leggings != null) {
-            Item item = ForgeRegistries.ITEMS.getValue(leggings);
+            Item item = BuiltInRegistries.ITEM.get(leggings);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.LEGS, new ItemStack(item));
             }
         }
         ResourceLocation boots = Tools.getRandomFromList(rand, settings.getBoots());
         if (boots != null) {
-            Item item = ForgeRegistries.ITEMS.getValue(boots);
+            Item item = BuiltInRegistries.ITEM.get(boots);
             if (item != null) {
                 entity.setItemSlot(EquipmentSlot.FEET, new ItemStack(item));
             }
