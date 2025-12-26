@@ -1,3 +1,6 @@
+1.21-5.0.1:
+- TqLxQuanZ found a problem with single-chunk buildings in chunk mode. This is now fixed and was actually also broken for multi-chunk
+
 1.21-5.0.0:
 - Port to 1.21.1
 
