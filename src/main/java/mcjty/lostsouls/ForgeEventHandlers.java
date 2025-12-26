@@ -219,12 +219,24 @@ public class ForgeEventHandlers {
         int maxEntities = 0;
         if (Config.USE_CHUNK_CHECK.get()) {
             maxEntities = totalMobs;
-            List<Entity> entityList = world.getEntities(
-                    (Entity) null,
-                    new AABB(chunkX * 16, minY, chunkZ * 16, maxChunkX * 16, maxY, maxChunkZ * 16),
-                    entity -> entity.getTags().stream().anyMatch(tag -> tag.contains("_ls_/"))
-            );
-            cnt = entityList.size();
+            // This is a single chunk horde building
+            if (chunkX == maxChunkX && chunkZ == maxChunkZ) {
+                List<Entity> entityList = world.getEntities(
+                        (Entity) null,
+                        new AABB(chunkX * 16 , minY, chunkZ * 16, (chunkX + 1) * 16, maxY, (chunkZ + 1) * 16),
+                        entity -> entity.getTags().stream().anyMatch(tag -> tag.contains("_ls_/"))
+                );
+                cnt = entityList.size();
+            }
+            // This is a multichunk horde building.
+            else {
+                List<Entity> entityList = world.getEntities(
+                        (Entity) null,
+                        new AABB(chunkX * 16, minY, chunkZ * 16, maxChunkX * 16, maxY, maxChunkZ * 16),
+                        entity -> entity.getTags().stream().anyMatch(tag -> tag.contains("_ls_/"))
+                );
+                cnt = entityList.size();
+            }
         }
         else {
             maxEntities = Config.SPAWN_MAX_NEARBY.get();
