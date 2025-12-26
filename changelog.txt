@@ -1,3 +1,6 @@
+1.20-4.1.6:
+- TqLxQuanZ fixed single chunk buildings spawning infinite monsters when using chunk check.
+
 1.20-4.1.5:
 - Added compatibility for modded containers to be included for horde chest locking.
 - Mobs from horde building are now categorized as "mob_summoned" spawn type.
