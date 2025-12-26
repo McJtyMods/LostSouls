@@ -221,12 +221,11 @@ public class ForgeEventHandlers {
             maxEntities = totalMobs;
             List<Entity> entityList = world.getEntities(
                     (Entity) null,
-                    new AABB(chunkX * 16, minY, chunkZ * 16, maxChunkX * 16, maxY, maxChunkZ * 16),
+                    new AABB(chunkX * 16, minY, chunkZ * 16, (maxChunkX+1) * 16, maxY, (maxChunkZ+1) * 16),
                     entity -> entity.getTags().stream().anyMatch(tag -> tag.contains("_ls_/"))
             );
             cnt = entityList.size();
-        }
-        else {
+        } else {
             maxEntities = Config.SPAWN_MAX_NEARBY.get();
             cnt = world.getEntities((Entity) null,
                     new AABB(x, y, z, x + 1, y + 1, z + 1).inflate(Config.SPAWN_MAX_NEARBY_RADIUS.get()),

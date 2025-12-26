@@ -1,3 +1,6 @@
+1.20-4.1.6:
+- TqLxQuanZ found a problem with single-chunk buildings in chunk mode. This is now fixed and was actually also broken for multi-chunk
+
 1.20-4.1.5:
 - Added compatibility for modded containers to be included for horde chest locking.
 - Mobs from horde building are now categorized as "mob_summoned" spawn type.
