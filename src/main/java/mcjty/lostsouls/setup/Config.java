@@ -33,6 +33,7 @@ public class Config {
     public static ForgeConfigSpec.LongValue MESSAGE_INTERVAL;// = 12000; 10 minutes
     public static ForgeConfigSpec.IntValue SERVERTICK_TIMEOUT;// = 200;
     public static ForgeConfigSpec.BooleanValue USE_CHUNK_CHECK;// = false;
+    public static ForgeConfigSpec.IntValue SPAWN_MAX_IN_BUILDING;// = 6;
     public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY;// = 6;
     public static ForgeConfigSpec.IntValue SPAWN_MAX_NEARBY_RADIUS;// = 8;
     public static ForgeConfigSpec.DoubleValue MIN_SPAWN_DISTANCE;// = 8.0f;
@@ -143,8 +144,11 @@ public class Config {
                 .comment("The amount of ticks that the server waits before checking for new spawns")
                 .defineInRange("serverTickTimeout", 200, 1, 1000000);
         USE_CHUNK_CHECK = SERVER_BUILDER
-                .comment("If this is true, the horde building spawning max amount will be based on the total mob required to kill, and it won't use SPAWN_MAX_NEARBY/RADIUS at all.")
+                .comment("If this is true, Lost Souls are counted across the entire building and spawnMaxInBuilding is used instead of spawnMaxNearby/spawnMaxNearbyRadius.")
                 .define("useChunkCheck", false);
+        SPAWN_MAX_IN_BUILDING = SERVER_BUILDER
+                .comment("The maximum number of Lost Souls that can be alive at once in a building or multibuilding when useChunkCheck is enabled")
+                .defineInRange("spawnMaxInBuilding", 15, 1, 10000);
         SPAWN_MAX_NEARBY = SERVER_BUILDER
                 .comment("The maximum amount of entities that can spawn near each other (of the same type)")
                 .defineInRange("spawnMaxNearby", 6, 1, 200);

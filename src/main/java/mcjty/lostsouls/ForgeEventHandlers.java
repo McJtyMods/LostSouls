@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -76,7 +77,7 @@ public class ForgeEventHandlers {
                     LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, info);
                     ILostChunkInfo chunkInfo = info.getChunkInfo(chunkX, chunkZ);
                     String buildingType = chunkInfo.getBuildingType();
-                    if (isHaunted(data, buildingType)) {
+                    if (isHaunted(world, data, buildingType)) {
                         event.setCanceled(true);
                         if (Config.ANNOUNCE_CHESTLOCKED.get()) {
                             MutableComponent unsafeMessage = Component.translatable(Config.MESSAGE_UNSAFE_BUILDING.get());
@@ -126,7 +127,10 @@ public class ForgeEventHandlers {
         }
     }
 
-    private boolean isHaunted(LostChunkData data, String buildingType) {
+    private boolean isHaunted(Level world, LostChunkData data, String buildingType) {
+        if (world.getDifficulty() == Difficulty.PEACEFUL) {
+            return false;
+        }
         if (buildingType == null) {
             return false;
         }
@@ -149,7 +153,7 @@ public class ForgeEventHandlers {
             long gameTime = world.getGameTime();
             LostChunkData data = LostSoulData.getSoulData(world, chunkX, chunkZ, lost);
 
-            if (isHaunted(data, buildingType)) {
+            if (isHaunted(world, data, buildingType)) {
                 // Restrict spawning to roughly the dimensions of the building
                 int realHeight = lost.getRealHeight(chunkInfo.getCityLevel());
 
@@ -180,8 +184,8 @@ public class ForgeEventHandlers {
                     rootZ = chunkZ - mb.offsetZ();
                     chunkX = rootX + rand.nextInt(0, mb.w());
                     chunkZ = rootZ + rand.nextInt(0, mb.h());
-                    maxChunkX = rootX + mb.w();
-                    maxChunkZ = rootZ + mb.h();
+                    maxChunkX = rootX + mb.w() - 1;
+                    maxChunkZ = rootZ + mb.h() - 1;
                 }
 
                 double x = chunkX * 16 + Math.floor(rand.nextDouble() * 16.0) + 0.5;
@@ -218,7 +222,7 @@ public class ForgeEventHandlers {
         int cnt = 0;
         int maxEntities = 0;
         if (Config.USE_CHUNK_CHECK.get()) {
-            maxEntities = totalMobs;
+            maxEntities = Math.min(totalMobs, Config.SPAWN_MAX_IN_BUILDING.get());
             List<Entity> entityList = world.getEntities(
                     (Entity) null,
                     new AABB(chunkX * 16, minY, chunkZ * 16, (maxChunkX+1) * 16, maxY, (maxChunkZ+1) * 16),
@@ -232,7 +236,7 @@ public class ForgeEventHandlers {
                     entity -> entity.getTags().stream().anyMatch(tag -> tag.contains("_ls_/"))
             ).size();
         }
-        if (cnt <= maxEntities) {
+        if (cnt < maxEntities) {
             Entity entity = type.create(world);
             entity.setPos(x, y, z);
             entity.setXRot(rand.nextFloat() * 360.0F);
