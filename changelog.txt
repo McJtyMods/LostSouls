@@ -1,5 +1,5 @@
 1.20-4.1.7:
-- Added a configurable cap (spawnMaxInBuilding) for simultaneously active Lost Souls per building when chunk checking is enabled.
+- Added a configurable cap (spawnMaxInBuilding) for simultaneously active Lost Souls per building when chunk checking is enabled, with per-building MobSettings overrides.
 - Haunted buildings no longer spawn mobs or lock chests in peaceful mode.
 - Fixed Lost Souls counting bounds for multibuildings.
 

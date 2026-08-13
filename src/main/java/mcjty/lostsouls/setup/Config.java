@@ -283,7 +283,8 @@ public class Config {
                     Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
                     Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
                     Optional.of(new MobSettings.Range<>(Config.MIN_MOBS.get(), Config.MAX_MOBS.get())),
-                    Optional.of(Config.HAUNTED_CHANCE.get())
+                    Optional.of(Config.HAUNTED_CHANCE.get()),
+                    Optional.empty()
             );
         }
         return defaultSettings;
@@ -304,7 +305,8 @@ public class Config {
                     Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
                     Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
                     Optional.of(new MobSettings.Range<>(Config.SPHERE_MIN_MOBS.get(), Config.SPHERE_MAX_MOBS.get())),
-                    Optional.of(Config.SPHERE_HAUNTED_CHANCE.get())
+                    Optional.of(Config.SPHERE_HAUNTED_CHANCE.get()),
+                    Optional.empty()
             );
         }
         return defaultSphereSettings;
@@ -328,7 +330,8 @@ public class Config {
                         Optional.of(new MobSettings.Range<>(Config.MIN_HEALTH_BONUS.get(), Config.MAX_HEALTH_BONUS.get())),
                         Optional.of(new MobSettings.Range<>(Config.MIN_DAMAGE_BONUS.get(), Config.MAX_DAMAGE_BONUS.get())),
                         Optional.of(new MobSettings.Range<>(minMobs, maxMobs)),
-                Optional.of(hauntedChance)
+                Optional.of(hauntedChance),
+                Optional.empty()
         );
     }
 }

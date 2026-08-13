@@ -58,7 +58,8 @@ public class MobSettings {
                     DOUBLE_RANGE_CODEC.optionalFieldOf("healthbonus").forGetter(l -> Optional.ofNullable(l.healthBonus)),
                     DOUBLE_RANGE_CODEC.optionalFieldOf("damagebonus").forGetter(l -> Optional.ofNullable(l.damageBonus)),
                     INT_RANGE_CODEC.optionalFieldOf("mobamounts").forGetter(l -> Optional.ofNullable(l.mobAmounts)),
-                    Codec.DOUBLE.optionalFieldOf("hauntedchance").forGetter(l -> Optional.ofNullable(l.hauntedChance))
+                    Codec.DOUBLE.optionalFieldOf("hauntedchance").forGetter(l -> Optional.ofNullable(l.hauntedChance)),
+                    Codec.intRange(1, 10000).optionalFieldOf("spawnmaxinbuilding").forGetter(l -> Optional.ofNullable(l.spawnMaxInBuilding))
             ).apply(instance, MobSettings::new));
 
     private final Set<ResourceLocation> buildings;
@@ -75,6 +76,7 @@ public class MobSettings {
     private final Range<Double> damageBonus;
     private final Range<Integer> mobAmounts;
     private final Double hauntedChance;
+    private final Integer spawnMaxInBuilding;
 
     public MobSettings(
             List<ResourceLocation> buildings,
@@ -82,7 +84,8 @@ public class MobSettings {
             Optional<List<RL>> mobs, Optional<List<RL>> weapons, Optional<List<RL>> helmets,
             Optional<List<RL>> chestplates, Optional<List<RL>> leggings, Optional<List<RL>> boots,
             Optional<List<Effect>> effects, Optional<Range<Double>> healthBonus,
-            Optional<Range<Double>> damageBonus, Optional<Range<Integer>> mobAmounts, Optional<Double> hauntedChance) {
+            Optional<Range<Double>> damageBonus, Optional<Range<Integer>> mobAmounts, Optional<Double> hauntedChance,
+            Optional<Integer> spawnMaxInBuilding) {
         this.buildings = new HashSet<>(buildings);
         this.multiBuildings = new HashSet<>(multiBuildings);
         this.mobs = mobs.orElse(null);
@@ -96,6 +99,7 @@ public class MobSettings {
         this.damageBonus = damageBonus.orElse(null);
         this.mobAmounts = mobAmounts.orElse(null);
         this.hauntedChance = hauntedChance.orElse(null);
+        this.spawnMaxInBuilding = spawnMaxInBuilding.orElse(null);
     }
 
     @Nonnull
@@ -163,6 +167,11 @@ public class MobSettings {
         return hauntedChance;
     }
 
+    @Nullable
+    public Integer getSpawnMaxInBuilding() {
+        return spawnMaxInBuilding;
+    }
+
     public static MobSettings merge(MobSettings base, MobSettings override) {
         return new MobSettings(
                 new ArrayList<>(override.buildings),        // The base doesn't have buildings so we always take from the override
@@ -177,7 +186,8 @@ public class MobSettings {
                 Optional.of(override.healthBonus == null ? base.healthBonus : override.healthBonus),
                 Optional.of(override.damageBonus == null ? base.damageBonus : override.damageBonus),
                 Optional.of(override.mobAmounts == null ? base.mobAmounts : override.mobAmounts),
-                Optional.ofNullable(override.hauntedChance == null ? base.hauntedChance : override.hauntedChance)
+                Optional.ofNullable(override.hauntedChance == null ? base.hauntedChance : override.hauntedChance),
+                Optional.ofNullable(override.spawnMaxInBuilding == null ? base.spawnMaxInBuilding : override.spawnMaxInBuilding)
         );
     }
 }

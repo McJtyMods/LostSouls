@@ -222,7 +222,9 @@ public class ForgeEventHandlers {
         int cnt = 0;
         int maxEntities = 0;
         if (Config.USE_CHUNK_CHECK.get()) {
-            maxEntities = Math.min(totalMobs, Config.SPAWN_MAX_IN_BUILDING.get());
+            Integer settingsMax = settings.getSpawnMaxInBuilding();
+            int spawnMaxInBuilding = settingsMax == null ? Config.SPAWN_MAX_IN_BUILDING.get() : settingsMax;
+            maxEntities = Math.min(totalMobs, spawnMaxInBuilding);
             List<Entity> entityList = world.getEntities(
                     (Entity) null,
                     new AABB(chunkX * 16, minY, chunkZ * 16, (maxChunkX+1) * 16, maxY, (maxChunkZ+1) * 16),
